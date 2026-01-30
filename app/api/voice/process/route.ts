@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// Initialize Gemini AI
+// Initialize Gemini AI with v1 API (stable)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 const CORS_HEADERS = {
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
       }, { headers: CORS_HEADERS })
     }
 
-    // Use Gemini to extract structured data
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    // Use Gemini to extract structured data with latest version
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
     
     const prompt = `Analyze this Vietnamese supply chain input and extract structured data.
 

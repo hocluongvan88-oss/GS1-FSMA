@@ -137,7 +137,7 @@ BEGIN
   new_hash := generate_audit_hash(
     (SELECT COALESCE(MAX(block_number), 0) + 1 FROM audit_log),
     prev_hash_val,
-    TG_TABLE_NAME,
+    TG_TABLE_NAME::TEXT,
     COALESCE(NEW.id, OLD.id),
     to_jsonb(COALESCE(NEW, OLD)),
     NOW()
@@ -156,7 +156,7 @@ BEGIN
   ) VALUES (
     CASE WHEN TG_TABLE_NAME = 'events' THEN COALESCE(NEW.id, OLD.id) ELSE NULL END,
     action_type_val,
-    TG_TABLE_NAME,
+    TG_TABLE_NAME::TEXT,
     COALESCE(NEW.id, OLD.id),
     to_jsonb(COALESCE(NEW, OLD)),
     auth.uid(), -- Use auth.uid() directly since not all tables have user_id column
@@ -216,7 +216,7 @@ BEGIN
       a.block_number,
       a.previous_hash,
       a.current_hash,
-      a.entity_type,
+      a.entity_type::TEXT,
       a.entity_id,
       a.payload,
       a.created_at
@@ -253,7 +253,15 @@ DECLARE
   rec RECORD;
   expected_hash TEXT;
 BEGIN
-  SELECT * INTO rec
+  SELECT 
+    block_number,
+    previous_hash,
+    current_hash,
+    entity_type::TEXT as entity_type,
+    entity_id,
+    payload,
+    created_at
+  INTO rec
   FROM audit_log
   WHERE block_number = block_num;
   

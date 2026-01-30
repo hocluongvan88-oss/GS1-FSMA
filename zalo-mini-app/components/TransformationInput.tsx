@@ -294,7 +294,7 @@ export function TransformationInput({ onSubmit, accessToken }: TransformationInp
           onChange={(e) => setProductType(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
         >
-          <option value="">Chọn loại chế biến (tùy chọn)</option>
+          <option value="">Chọn loại chế biến (tùy ch���n)</option>
           <option value="fresh_to_dried_fruit">Trái cây tươi → Sấy khô</option>
           <option value="raw_coffee_to_roasted">Cà phê nhân → Rang xay</option>
           <option value="fresh_mango_to_juice">Xoài tươi → Nước ép</option>

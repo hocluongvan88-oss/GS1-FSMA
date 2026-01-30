@@ -39,7 +39,7 @@ Hệ thống tự động từ chối ảnh không liên quan đến chuỗi cun
 **Lý do:** Không có thông tin truy xuất
 
 #### 5. Thú cưng, động vật
-- Chó, m��o, thú cưng
+- Chó, mèo, thú cưng
 - Động vật không liên quan sản xuất
 
 **Lý do:** Không phải đối tượng truy xuất

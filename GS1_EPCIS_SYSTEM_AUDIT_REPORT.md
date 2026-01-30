@@ -56,7 +56,7 @@ Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yê
 - ✅ Xử lý được AggregationEvent với action ADD/DELETE
 - ✅ Sử dụng GIN index cho JSONB query nhanh
 
-**Khuyến ngh���:** KHÔNG CẦN SỬA
+**Khuyến nghị:** KHÔNG CẦN SỬA
 
 ---
 
@@ -130,7 +130,7 @@ WHERE t.depth < 10
 
 ### 2.1. ❌ THIẾU: Commissioning Event riêng biệt
 
-**Trạng thái:** ⚠��� NGHIÊM TRỌNG - Thiếu sự kiện gốc
+**Trạng thái:** ⚠️ NGHIÊM TRỌNG - Thiếu sự kiện gốc
 
 **Hiện tại:**
 - Code có sử dụng `biz_step = 'commissioning'` trong ObjectEvent

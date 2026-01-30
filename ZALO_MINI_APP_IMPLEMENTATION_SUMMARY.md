@@ -327,7 +327,7 @@ Respond with ONLY valid JSON:
           ▼                  ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Supabase Edge Functions                        │
-│  ┌────────────────────┐  ┌��───────────────────┐            │
+│  ┌────────────────────┐  ┌────────────────────┐            │
 │  │ process-voice-input│  │ process-vision-input│           │
 │  │                    │  │                     │            │
 │  │ 1. Fetch audio     │  │ 1. Fetch image      │            │

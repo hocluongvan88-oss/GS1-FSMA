@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-// Initialize Gemini AI
+// Initialize Gemini AI with v1 API (stable)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 const CORS_HEADERS = {
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500, headers: CORS_HEADERS })
     }
 
-    // Use Gemini Vision with gemini-1.5-flash (supported by v1beta API)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    // Use Gemini Vision with gemini-1.5-flash-latest (supported by v1 API)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
     
     // Extract base64 data from data URL
     let imageData: string

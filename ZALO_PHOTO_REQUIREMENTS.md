@@ -216,7 +216,7 @@ Chụp:
 - **≥ 0.9** → Excellent (tự động chấp nhận)
 - **0.7 - 0.89** → Good (cần review nhanh)
 - **0.6 - 0.69** → Fair (cần xem lại kỹ)
-- **< 0.6** → Poor (cần chụp l���i hoặc nhập thủ công)
+- **< 0.6** → Poor (cần chụp lại hoặc nhập thủ công)
 
 ### **Khi Nào AI Yêu Cầu Xác Nhận:**
 - Confidence < 0.6

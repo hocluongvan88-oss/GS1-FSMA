@@ -36,7 +36,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
   - Quản lý workers
 
 ### 4. **QUALITY_INSPECTOR** - Thanh tra chất lượng
-- **Mô t��**: Kiểm tra và đảm bảo chất lượng sản phẩm
+- **Mô tả**: Kiểm tra và đảm bảo chất lượng sản phẩm
 - **Quyền hạn**:
   - Tạo quality inspection events
   - Cập nhật quality metrics
