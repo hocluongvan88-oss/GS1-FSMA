@@ -155,7 +155,7 @@ export default function ZaloPreviewPage() {
                 <div className="text-center">
                   <h3 className="font-semibold text-lg mb-2">Nhập nhiều sản phẩm</h3>
                   <p className="text-sm text-muted-foreground">
-                    Thêm nhiều sản phẩm trong một l���n
+                    Thêm nhiều sản phẩm trong một lần
                   </p>
                 </div>
 
