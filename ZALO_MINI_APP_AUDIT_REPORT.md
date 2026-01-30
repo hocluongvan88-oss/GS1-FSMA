@@ -16,7 +16,7 @@ zalo-mini-app/
 │   ├── CameraCapture.tsx      ✅ Đã triển khai
 │   └── VoiceRecorder.tsx      ✅ Đã triển khai
 ├── pages/
-│   └── index.tsx              ✅ Đã triển khai
+│   └��─ index.tsx              ✅ Đã triển khai
 ├── utils/
 │   └── zalo-auth.ts           ✅ Đã triển khai
 ├── app-config.json            ✅ Đã cấu hình

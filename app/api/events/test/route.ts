@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     const { data: events, error } = await supabase
       .from('events')
-      .select('id, event_type, action, source_type, event_time, epc_list, quantity_list')
+      .select('id, event_type, action, source_type, event_time, epc_list, quantity_list, epcis_document, input_quantity, output_quantity')
       .order('event_time', { ascending: false })
       .limit(Number.parseInt(limit))
 
@@ -35,12 +35,41 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    console.log('[v0] Successfully fetched events:', events?.length || 0)
+    // Extract quantity from epcis_document if quantity_list is empty
+    const enrichedEvents = events?.map(event => {
+      let quantityList = event.quantity_list || []
+      
+      // If quantity_list is empty, try to get from epcis_document
+      if ((!quantityList || quantityList.length === 0) && event.epcis_document) {
+        const doc = event.epcis_document as any
+        if (doc?.epcisBody?.eventList?.[0]?.quantityList) {
+          quantityList = doc.epcisBody.eventList[0].quantityList
+        }
+      }
+      
+      // For transformation events, use input/output quantities
+      if (event.event_type === 'TransformationEvent') {
+        if (event.input_quantity || event.output_quantity) {
+          quantityList = {
+            input: event.input_quantity,
+            output: event.output_quantity
+          }
+        }
+      }
+      
+      return {
+        ...event,
+        quantity_list: quantityList
+      }
+    }) || []
+
+    console.log('[v0] Successfully fetched events:', enrichedEvents.length)
+    console.log('[v0] First event quantity_list:', enrichedEvents[0]?.quantity_list)
 
     return NextResponse.json({
       success: true,
-      data: events || [],
-      count: events?.length || 0,
+      data: enrichedEvents,
+      count: enrichedEvents.length,
       message: 'Fetched using service role (test only)'
     })
   } catch (error: any) {

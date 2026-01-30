@@ -520,9 +520,23 @@ export default function ZaloTestPage() {
                     {(event.quantity_list || event.input_quantity || event.output_quantity) && (
                       <div className="col-span-2">
                         <span className="text-gray-600">Quantity:</span>{' '}
-                        {event.quantity_list && JSON.stringify(event.quantity_list)}
-                        {event.input_quantity && `Input: ${JSON.stringify(event.input_quantity)}`}
-                        {event.output_quantity && ` Output: ${JSON.stringify(event.output_quantity)}`}
+                        {Array.isArray(event.quantity_list) && event.quantity_list.length > 0 && (
+                          <span className="font-medium text-green-600">
+                            {event.quantity_list.map((q: any, i: number) => (
+                              <span key={i}>
+                                {i > 0 && ', '}
+                                {q.quantity} {q.uom}
+                                {q.epcClass && ` (${q.epcClass.split('.').pop()?.replace(/_/g, ' ')})`}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                        {event.input_quantity && (
+                          <span>Input: <span className="font-medium text-blue-600">{JSON.stringify(event.input_quantity)}</span></span>
+                        )}
+                        {event.output_quantity && (
+                          <span> Output: <span className="font-medium text-purple-600">{JSON.stringify(event.output_quantity)}</span></span>
+                        )}
                       </div>
                     )}
                   </div>

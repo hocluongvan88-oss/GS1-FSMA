@@ -6,7 +6,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 
 ---
 
-## Các Roles trong hệ thống
+## Các Roles trong hệ th���ng
 
 ### 1. **SYSTEM_ADMIN** - Quản trị hệ thống
 - **Mô tả**: Quyền cao nhất, quản lý toàn bộ hệ thống
@@ -172,7 +172,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 
 ### Protected Routes:
 - `/admin/*` - Chỉ system_admin và admin
-- `/analytics` - T���t cả authenticated users
+- `/analytics` - Tất cả authenticated users
 - `/audit` - system_admin, admin, auditor
 - `/ai-review` - system_admin, admin, factory_manager, quality_inspector
 

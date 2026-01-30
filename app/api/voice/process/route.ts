@@ -189,6 +189,28 @@ async function createEPCISEvent(
     uom: data.unit.toUpperCase()
   }]
 
+  // Build EPCIS document with quantity information
+  const epcisDocument = {
+    '@context': ['https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld'],
+    type: 'EPCISDocument',
+    schemaVersion: '2.0',
+    creationDate: now,
+    epcisBody: {
+      eventList: [{
+        eventType: 'ObjectEvent',
+        eventTime: now,
+        eventTimeZoneOffset: '+07:00',
+        action: data.action === 'ship' ? 'DELETE' : 'ADD',
+        bizStep: data.action === 'receive' ? 'receiving' : data.action === 'ship' ? 'shipping' : 'commissioning',
+        disposition: 'active',
+        readPoint: { id: locationGLN },
+        bizLocation: { id: locationGLN },
+        epcList: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
+        quantityList: quantityList
+      }]
+    }
+  }
+
   const eventData = {
     event_type: 'ObjectEvent',
     action: data.action === 'ship' ? 'DELETE' : 'ADD',
@@ -199,7 +221,8 @@ async function createEPCISEvent(
     read_point: locationGLN,
     biz_location: locationGLN,
     epc_list: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
-    quantity_list: quantityList, // Correctly populated quantity_list
+    quantity_list: quantityList, // Store in dedicated column
+    epcis_document: epcisDocument, // Also store in EPCIS document
     source_type: 'voice_ai',
     user_id: userId,
     user_name: userName,

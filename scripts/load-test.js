@@ -102,7 +102,7 @@ async function runLoadTest() {
   const reqPerSec = (totalRequests / (totalDuration / 1000)).toFixed(2)
   
   console.log(`\n
-━━━━━━━━━━━━━���━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 Results
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Total Requests:     ${totalRequests}

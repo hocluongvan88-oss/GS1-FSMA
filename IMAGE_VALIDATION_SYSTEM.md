@@ -20,7 +20,7 @@ Hệ thống tự động từ chối ảnh không liên quan đến chuỗi cun
 #### 2. Ảnh phong cảnh/thiên nhiên
 - Cảnh núi non, biển cả
 - Vườn cây (không phải nông trại sản xuất)
-- ��nh du lịch, nghỉ dưỡng
+- Ảnh du lịch, nghỉ dưỡng
 
 **Lý do:** Không liên quan truy xuất nguồn gốc
 
