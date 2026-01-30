@@ -163,36 +163,59 @@ async function createEPCISEvent(
   userName: string,
   locationGLN: string
 ) {
-  const eventId = `urn:uuid:${crypto.randomUUID()}`
   const now = new Date().toISOString()
 
+  // Build EPCIS 2.0 JSON-LD document
+  const epcisDocument = {
+    '@context': ['https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld'],
+    type: 'EPCISDocument',
+    schemaVersion: '2.0',
+    creationDate: now,
+    epcisBody: {
+      eventList: [{
+        type: 'ObjectEvent',
+        eventTime: now,
+        eventTimeZoneOffset: '+07:00',
+        action: 'OBSERVE',
+        bizStep: 'inspecting',
+        disposition: data.condition === 'damaged' ? 'damaged' : 'active',
+        readPoint: { id: `urn:epc:id:sgln:${locationGLN}` },
+        bizLocation: { id: `urn:epc:id:sgln:${locationGLN}` },
+        epcList: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
+        quantityList: data.quantity ? [{
+          epcClass: `urn:epc:class:lgtin:${locationGLN}.${data.productName.replace(/\s/g, '_')}`,
+          quantity: data.quantity,
+          uom: (data.unit || 'EA').toUpperCase()
+        }] : undefined
+      }]
+    }
+  }
+
+  // Match the actual database schema from 001-create-epcis-schema.sql
   const eventData = {
-    id: eventId,
     event_type: 'ObjectEvent',
-    action: 'OBSERVE',
+    event_time: now,
+    event_timezone: 'Asia/Ho_Chi_Minh',
     biz_step: 'inspecting',
     disposition: data.condition === 'damaged' ? 'damaged' : 'active',
-    event_time: now,
-    event_timezone_offset: '+07:00',
     read_point: locationGLN,
     biz_location: locationGLN,
     epc_list: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
-    quantity_list: data.quantity ? [{
-      epc_class: `urn:epc:class:lgtin:${locationGLN}.${data.productName.replace(/\s/g, '_')}`,
-      quantity: data.quantity,
-      uom: (data.unit || 'EA').toUpperCase()
-    }] : null,
-    source_type: 'vision_input',
-    created_by: userId,
+    user_id: userId,
     user_name: userName,
-    raw_input: JSON.stringify(data),
-    ilmd: data.batchNumber ? { lotNumber: data.batchNumber } : null
+    source_type: 'vision_ai',  // Valid value per database constraint
+    ai_metadata: {
+      method: 'gemini_vision',
+      extractedData: data,
+      confidence: 0.90
+    },
+    epcis_document: epcisDocument
   }
 
-  console.log('[v0] Vision process API: Creating event:', eventId)
+  console.log('[v0] Vision process API: Creating event')
 
   const { data: result, error } = await supabase
-    .from('epcis_events')
+    .from('events')  // Correct table name
     .insert(eventData)
     .select()
     .single()
