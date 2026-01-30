@@ -221,33 +221,57 @@ async function createEPCISEvent(
     'observe': 'OBSERVE'
   }
 
+  // Build EPCIS 2.0 JSON-LD document
+  const epcisDocument = {
+    '@context': ['https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld'],
+    type: 'EPCISDocument',
+    schemaVersion: '2.0',
+    creationDate: now,
+    epcisBody: {
+      eventList: [{
+        type: 'ObjectEvent',
+        eventTime: now,
+        eventTimeZoneOffset: '+07:00',
+        action: actionMap[data.action || 'observe'] || 'OBSERVE',
+        bizStep: bizStepMap[data.action || 'observe'] || 'observing',
+        disposition: 'active',
+        readPoint: { id: `urn:epc:id:sgln:${locationGLN}` },
+        bizLocation: { id: `urn:epc:id:sgln:${locationGLN}` },
+        epcList: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
+        quantityList: data.quantity ? [{
+          epcClass: `urn:epc:class:lgtin:${locationGLN}.${data.productName.replace(/\s/g, '_')}`,
+          quantity: data.quantity,
+          uom: (data.unit || 'KGM').toUpperCase()
+        }] : undefined
+      }]
+    }
+  }
+
+  // Match the actual database schema from 001-create-epcis-schema.sql
   const eventData = {
-    id: eventId,
     event_type: 'ObjectEvent',
-    action: actionMap[data.action || 'observe'] || 'OBSERVE',
+    event_time: now,
+    event_timezone: 'Asia/Ho_Chi_Minh',
     biz_step: bizStepMap[data.action || 'observe'] || 'observing',
     disposition: 'active',
-    event_time: now,
-    event_timezone_offset: '+07:00',
     read_point: locationGLN,
     biz_location: locationGLN,
     epc_list: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
-    quantity_list: data.quantity ? [{
-      epc_class: `urn:epc:class:lgtin:${locationGLN}.${data.productName.replace(/\s/g, '_')}`,
-      quantity: data.quantity,
-      uom: (data.unit || 'KGM').toUpperCase()
-    }] : null,
-    source_type: 'voice_input',
-    created_by: userId,
+    user_id: userId,
     user_name: userName,
-    raw_input: JSON.stringify(data),
-    ilmd: data.batchNumber ? { lotNumber: data.batchNumber } : null
+    source_type: 'voice_ai',
+    ai_metadata: {
+      method: 'voice_transcript',
+      extractedData: data,
+      confidence: 0.85
+    },
+    epcis_document: epcisDocument
   }
 
   console.log('[v0] Voice process API: Creating event:', eventId)
 
   const { data: result, error } = await supabase
-    .from('epcis_events')
+    .from('events')
     .insert(eventData)
     .select()
     .single()
