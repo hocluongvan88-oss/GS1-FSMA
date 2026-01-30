@@ -722,9 +722,55 @@ export default function ShipmentsPage() {
               {/* Items */}
               {selectedShipment.items && (
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-3">{t('shipments.itemsList')}</h4>
-                  <div className="bg-muted/50 p-3 rounded font-mono text-xs overflow-x-auto">
-                    <pre>{JSON.stringify(selectedShipment.items, null, 2)}</pre>
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    {t('shipments.itemsList')}
+                  </h4>
+                  <div className="space-y-2">
+                    {Array.isArray(selectedShipment.items) && selectedShipment.items.length > 0 ? (
+                      selectedShipment.items.map((item: any, idx: number) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 bg-gradient-to-r from-blue-500/5 to-purple-500/5 border border-blue-500/20 rounded-lg">
+                          <div className="w-8 h-8 bg-blue-500/10 rounded flex items-center justify-center shrink-0">
+                            <span className="text-blue-600 font-semibold">{idx + 1}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            {item.product_name && (
+                              <p className="text-base font-semibold text-foreground mb-1">
+                                {item.product_name}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <div className="flex items-center gap-1">
+                                <span className="text-sm text-muted-foreground">{t('shipments.form.quantity')}:</span>
+                                <span className="text-base font-semibold text-green-600">
+                                  {item.quantity || item.value || 0} {item.unit || item.uom || ''}
+                                </span>
+                              </div>
+                              {item.batch_number && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm text-muted-foreground">{t('shipments.form.batchNumber')}:</span>
+                                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                                    {item.batch_number}
+                                  </code>
+                                </div>
+                              )}
+                              {item.batch_id && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm text-muted-foreground">Batch ID:</span>
+                                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono truncate max-w-[200px]">
+                                    {item.batch_id}
+                                  </code>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground text-center">
+                        {t('shipments.noItems')}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -732,9 +778,29 @@ export default function ShipmentsPage() {
               {/* Vehicle Info */}
               {selectedShipment.vehicle_info && (
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-3">{t('shipments.vehicleInfo')}</h4>
-                  <div className="bg-muted/50 p-3 rounded font-mono text-xs overflow-x-auto">
-                    <pre>{JSON.stringify(selectedShipment.vehicle_info, null, 2)}</pre>
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Truck className="w-4 h-4" />
+                    {t('shipments.vehicleInfo')}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedShipment.vehicle_info.plate && (
+                      <div className="p-3 bg-muted/50 rounded">
+                        <p className="text-xs text-muted-foreground mb-1">{t('shipments.form.licensePlate')}</p>
+                        <p className="font-semibold font-mono">{selectedShipment.vehicle_info.plate}</p>
+                      </div>
+                    )}
+                    {selectedShipment.vehicle_info.driver && (
+                      <div className="p-3 bg-muted/50 rounded">
+                        <p className="text-xs text-muted-foreground mb-1">{t('shipments.form.driverName')}</p>
+                        <p className="font-medium">{selectedShipment.vehicle_info.driver}</p>
+                      </div>
+                    )}
+                    {selectedShipment.vehicle_info.phone && (
+                      <div className="p-3 bg-muted/50 rounded col-span-2">
+                        <p className="text-xs text-muted-foreground mb-1">{t('shipments.form.driverPhone')}</p>
+                        <p className="font-mono">{selectedShipment.vehicle_info.phone}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

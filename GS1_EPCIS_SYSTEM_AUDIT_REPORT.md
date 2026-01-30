@@ -54,7 +54,7 @@ Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yê
 **Đánh giá:**
 - ✅ Duyệt từ SSCC (Pallet) xuống childEPCs (Sản phẩm đơn lẻ)
 - ✅ Xử lý được AggregationEvent với action ADD/DELETE
-- ✅ Sử dụng GIN index cho JSONB query nhanh
+- ✅ Sử d���ng GIN index cho JSONB query nhanh
 
 **Khuyến nghị:** KHÔNG CẦN SỬA
 

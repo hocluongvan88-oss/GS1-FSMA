@@ -168,7 +168,7 @@
       "jobsRequiringReviewDesc": "Kết quả xử lý AI với điểm tin cậy thấp",
       "noJobsReview": "Hiện không có công việc nào cần xem xét",
       "totalProcessed": "Tổng đã xử lý",
-      "avgConfidence": "Đ�� tin cậy TB",
+      "avgConfidence": "Độ tin cậy TB",
       "avgTime": "Thời gian TB",
       "successRate": "Tỷ lệ thành công",
       "confidenceScore": "Điểm tin cậy",

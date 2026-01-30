@@ -100,7 +100,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 
 **Chú thích:**
 - C = Create, R = Read, U = Update, D = Delete
-- `*` = Có giới hạn (VD: chỉ của mình, ch�� loại specific)
+- `*` = Có giới hạn (VD: chỉ của mình, chỉ loại specific)
 - `-` = Không có quyền
 
 ---
