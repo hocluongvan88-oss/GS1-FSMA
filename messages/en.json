@@ -1127,5 +1127,127 @@
     "noCertifications": "No certifications linked to this batch",
     "createSuccess": "Export document created successfully",
     "downloadSuccess": "Document downloaded successfully"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "compliance": "Compliance",
+      "solutions": "Solutions",
+      "about": "About",
+      "login": "Log In",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "badge": "GS1 EPCIS 2.0 Compliant | FSMA 204 Ready",
+      "title": "Food Traceability Platform",
+      "titleHighlight": "for Vietnamese Agriculture",
+      "subtitle": "Empower Vietnamese agricultural exports with internationally compliant traceability. AI-powered, FSMA 204 (FDA) and EUDR (EU) ready - prepared for every global market.",
+      "cta": "Start Free Trial",
+      "ctaSecondary": "Watch Demo",
+      "trustedBy": "Trusted by leading export enterprises"
+    },
+    "stats": {
+      "compliance": "FSMA 204 Compliant",
+      "complianceDesc": "Full FDA requirements met",
+      "faster": "10x Faster",
+      "fasterDesc": "Than manual data entry",
+      "accuracy": "99.7% Accuracy",
+      "accuracyDesc": "With AI auto-validation",
+      "support": "24/7 Support",
+      "supportDesc": "Expert team always ready"
+    },
+    "features": {
+      "title": "Complete Supply Chain Solution",
+      "subtitle": "Farm to Fork - Transparent Every Step",
+      "voice": {
+        "title": "Voice Input",
+        "desc": "Workers simply speak in natural Vietnamese. AI converts to international EPCIS events - no complex training needed."
+      },
+      "vision": {
+        "title": "AI Image Recognition",
+        "desc": "Photograph products, shipping documents, labels. AI automatically extracts information and creates trace events."
+      },
+      "realtime": {
+        "title": "Real-time Monitoring",
+        "desc": "Intuitive dashboard displays the entire supply chain. Detect anomalies and receive timely alerts."
+      },
+      "blockchain": {
+        "title": "Blockchain Audit",
+        "desc": "Every change recorded in an immutable ledger. No one can modify history - ensuring absolute transparency."
+      },
+      "qrcode": {
+        "title": "GS1 Digital Link",
+        "desc": "Smart QR codes following GS1 standards. Consumers scan to see the complete product journey."
+      },
+      "export": {
+        "title": "Automatic Export Docs",
+        "desc": "Automatically generate FSMA 204 (US FDA) and EUDR (EU) compliant documents. Ready for any market."
+      }
+    },
+    "compliance": {
+      "title": "International Standards Compliance",
+      "subtitle": "One Platform - Multiple Standards",
+      "gs1": {
+        "title": "GS1 EPCIS 2.0",
+        "desc": "International traceability standard. Full support for 4 event types: Object, Aggregation, Transformation, Transaction."
+      },
+      "fsma": {
+        "title": "FSMA 204 (FDA)",
+        "desc": "Compliant with US food traceability regulations. Complete KDE capture: Harvest Date, Cooling, TLC."
+      },
+      "eudr": {
+        "title": "EUDR (European Union)",
+        "desc": "Meeting EU deforestation regulations. Prove legal origin for coffee, cocoa, timber."
+      },
+      "iso": {
+        "title": "ISO 22000",
+        "desc": "Integrated with food safety management systems. Supports HACCP and related standards."
+      }
+    },
+    "industries": {
+      "title": "Solutions for Every Industry",
+      "subtitle": "Supporting Vietnamese Agriculture",
+      "coffee": {
+        "title": "Coffee",
+        "desc": "From Central Highlands coffee farms to European espresso cups. Prove origin, farming methods, processing."
+      },
+      "rice": {
+        "title": "Rice",
+        "desc": "Trace from paddy fields to export bags. Record variety, growing region, milling process."
+      },
+      "seafood": {
+        "title": "Seafood",
+        "desc": "From aquaculture ponds to export containers. Monitor breeding, feed, farming environment."
+      },
+      "fruits": {
+        "title": "Fruits",
+        "desc": "Dragon fruit, mango, lychee... Record harvest date, cooling process, export packaging."
+      }
+    },
+    "cta": {
+      "title": "Ready to Go Global?",
+      "subtitle": "Start free in 5 minutes. No credit card required.",
+      "button": "Sign Up Free",
+      "demo": "Or schedule a demo with our experts"
+    },
+    "footer": {
+      "tagline": "International-standard traceability platform for Vietnamese agriculture",
+      "product": "Product",
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal",
+      "features": "Features",
+      "pricing": "Pricing",
+      "integrations": "Integrations",
+      "about": "About Us",
+      "careers": "Careers",
+      "partners": "Partners",
+      "docs": "Documentation",
+      "guides": "Guides",
+      "support": "Support",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "copyright": "2026 GS1 Traceability Vietnam. All rights reserved."
+    }
   }
 }

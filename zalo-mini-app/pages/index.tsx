@@ -9,33 +9,74 @@ import React, { useEffect, useState } from 'react';
 import { Page, Header, Text, Box, Button } from 'zmp-ui';
 import { VoiceRecorder } from '../components/VoiceRecorder';
 import { CameraCapture } from '../components/CameraCapture';
+import { BatchInput } from '../components/BatchInput';
+import { RecentEvents } from '../components/RecentEvents';
+import { OfflineQueue } from '../utils/offline-queue';
 import { 
-  authenticateWithZalo, 
-  getCurrentUser, 
+  initializeAuth,
+  getCurrentSession,
+  AuthSession,
   UserProfile,
-  supabase 
-} from '../utils/zalo-auth';
+  authenticateWithZalo,
+  supabase,
+  getUserProfile,
+  syncOfflineQueue // Declare the variable here
+} from '../utils/jwt-auth';
 
 export default function HomePage() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'voice' | 'camera'>('voice');
+  const [activeTab, setActiveTab] = useState<'voice' | 'camera' | 'batch'>('voice');
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [queueSize, setQueueSize] = useState(0);
+  const offlineQueue = OfflineQueue.getInstance();
 
   useEffect(() => {
     initializeApp();
+    
+    // Monitor online/offline status
+    const handleOnline = () => {
+      console.log('[v0] Back online, syncing queue...');
+      setIsOnline(true);
+      syncOfflineQueue(); // Use the declared variable here
+    };
+    const handleOffline = () => {
+      console.log('[v0] Going offline');
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Update queue size
+    setQueueSize(offlineQueue.getQueueSize());
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   const initializeApp = async () => {
     try {
       setLoading(true);
       
-      // Authenticate with Zalo
-      const { supabaseUser, isNewUser } = await authenticateWithZalo();
-      setUser(supabaseUser);
-
-      if (isNewUser) {
-        // Show onboarding for new users
+      // Check existing session first
+      let authSession = getCurrentSession();
+      
+      if (!authSession) {
+        // Initialize new auth with Zalo
+        authSession = await initializeAuth();
         alert('Chào mừng bạn! Hãy bắt đầu ghi nhận hoạt động của mình.');
+      }
+      
+      setSession(authSession);
+      setUser(await getUserProfile(authSession?.access_token));
+      
+      // Sync offline queue if online
+      if (navigator.onLine) {
+        await syncOfflineQueue();
       }
     } catch (error) {
       console.error('Initialization error:', error);
@@ -45,106 +86,161 @@ export default function HomePage() {
     }
   };
 
-  const handleVoiceRecording = async (audioUrl: string, transcript?: string) => {
+  const syncOfflineQueue = async () => {
+    if (!session) return;
+
+    const result = await offlineQueue.syncQueue(
+      session.accessToken,
+      process.env.NEXT_PUBLIC_SUPABASE_URL!
+    );
+
+    if (result.success > 0) {
+      alert(`Đã đồng bộ ${result.success} sự kiện từ hàng đợi`);
+    }
+    if (result.failed > 0) {
+      console.error('[v0] Failed to sync some events:', result.errors);
+    }
+
+    setQueueSize(offlineQueue.getQueueSize());
+  };
+
+  const handleVoiceRecording = async (audioUrl: string) => {
+    if (!session) return;
+
+    const eventData = {
+      audioUrl,
+      userId: session.user.id,
+      userName: session.user.fullName,
+      locationGLN: user?.assigned_location || null
+    };
+
+    // If offline, add to queue
+    if (!isOnline) {
+      offlineQueue.addToQueue('voice', eventData);
+      setQueueSize(offlineQueue.getQueueSize());
+      alert('Đang offline. Sự kiện đã được lưu vào hàng đợi.');
+      return;
+    }
+    
     try {
-      // Parse transcript to create EPCIS event
-      const eventData = parseVoiceInput(transcript || '');
-      
-      // Create event in database
-      await createEvent({
-        ...eventData,
-        source_type: 'voice_ai',
-        user_id: user?.id,
-        user_name: user?.full_name,
-        ai_metadata: {
-          transcript,
-          audioUrl,
-          confidence: 0.85 // From AI API
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-voice-input`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.accessToken}`
+          },
+          body: JSON.stringify(eventData)
         }
-      });
+      );
 
-      alert('Đã ghi nhận thành công!');
-    } catch (error) {
-      console.error('Error creating voice event:', error);
-      alert('Lỗi khi lưu dữ liệu.');
-    }
-  };
-
-  const handleImageCapture = async (imageUrl: string, aiResult?: any) => {
-    try {
-      // Create event from vision AI result
-      await createEvent({
-        event_type: 'ObjectEvent',
-        event_time: new Date().toISOString(),
-        biz_step: 'observing',
-        disposition: 'active',
-        read_point: user?.assigned_location,
-        source_type: 'vision_ai',
-        user_id: user?.id,
-        user_name: user?.full_name,
-        ai_metadata: {
-          imageUrl,
-          detectedText: aiResult?.ocr,
-          objectCount: aiResult?.count,
-          confidence: aiResult?.confidence
-        },
-        epcis_document: generateEPCISDocument({
-          eventType: 'ObjectEvent',
-          bizStep: 'observing',
-          aiResult
-        })
-      });
-
-      alert('Đã ghi nhận thành công!');
-    } catch (error) {
-      console.error('Error creating vision event:', error);
-      alert('Lỗi khi lưu dữ liệu.');
-    }
-  };
-
-  const createEvent = async (eventData: any) => {
-    const { data, error } = await supabase
-      .from('events')
-      .insert(eventData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  };
-
-  const parseVoiceInput = (transcript: string): any => {
-    // Simple parsing logic - in production use NLP/LLM
-    // Example: "Thu hoạch 50 kg cà phê tại vườn A"
-    return {
-      event_type: 'ObjectEvent',
-      event_time: new Date().toISOString(),
-      biz_step: 'commissioning',
-      disposition: 'active',
-      read_point: user?.assigned_location
-    };
-  };
-
-  const generateEPCISDocument = (params: any): any => {
-    // Generate GS1 EPCIS 2.0 JSON-LD document
-    return {
-      '@context': 'https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld',
-      type: 'EPCISDocument',
-      schemaVersion: '2.0',
-      creationDate: new Date().toISOString(),
-      epcisBody: {
-        eventList: [
-          {
-            type: params.eventType,
-            eventTime: new Date().toISOString(),
-            eventTimeZoneOffset: '+07:00',
-            bizStep: params.bizStep,
-            disposition: 'active'
-          }
-        ]
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(`Đã ghi nhận thành công! Phát hiện: ${result.extractedData.productName || 'N/A'}`);
+      } else {
+        alert('Lỗi: ' + result.validation.errors.join(', '));
       }
-    };
+    } catch (error) {
+      console.error('[v0] Error processing voice:', error);
+      // Add to queue on network error
+      offlineQueue.addToQueue('voice', eventData);
+      setQueueSize(offlineQueue.getQueueSize());
+      alert('Lỗi mạng. Đã lưu vào hàng đợi.');
+    }
   };
+
+  const handleImageCapture = async (imageUrl: string) => {
+    if (!session) return;
+
+    const eventData = {
+      imageUrl,
+      userId: session.user.id,
+      userName: session.user.fullName,
+      locationGLN: user?.assigned_location || null
+    };
+
+    // If offline, add to queue
+    if (!isOnline) {
+      offlineQueue.addToQueue('vision', eventData);
+      setQueueSize(offlineQueue.getQueueSize());
+      alert('Đang offline. Sự kiện đã được lưu vào hàng đợi.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-vision-input`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.accessToken}`
+          },
+          body: JSON.stringify(eventData)
+        }
+      );
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(`Đã ghi nhận thành công! Phát hiện: ${result.extractedData.productName || 'N/A'}`);
+      } else {
+        alert('Lỗi: ' + result.validation.errors.join(', '));
+      }
+    } catch (error) {
+      console.error('[v0] Error processing image:', error);
+      // Add to queue on network error
+      offlineQueue.addToQueue('vision', eventData);
+      setQueueSize(offlineQueue.getQueueSize());
+      alert('Lỗi mạng. Đã lưu vào hàng đợi.');
+    }
+  };
+
+  const handleBatchSubmit = async (items: any[]) => {
+    if (!session) return;
+
+    alert(`Đang xử lý ${items.length} sản phẩm...`);
+    
+    // Process batch items (simplified - in production would create transformation event)
+    for (const item of items) {
+      const eventData = {
+        imageUrl: '', // No image for batch input
+        userId: session.user.id,
+        userName: session.user.fullName,
+        locationGLN: user?.assigned_location || null,
+        manualData: item // Pass manual data for batch processing
+      };
+
+      if (!isOnline) {
+        offlineQueue.addToQueue('vision', eventData);
+      } else {
+        // Process immediately
+        try {
+          await fetch(
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-vision-input`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.accessToken}`
+              },
+              body: JSON.stringify(eventData)
+            }
+          );
+        } catch (error) {
+          console.error('[v0] Batch item failed:', error);
+          offlineQueue.addToQueue('vision', eventData);
+        }
+      }
+    }
+
+    setQueueSize(offlineQueue.getQueueSize());
+    alert(`Đã xử lý ${items.length} sản phẩm!`);
+  };
+
+
 
   if (loading) {
     return (
@@ -165,17 +261,26 @@ export default function HomePage() {
       />
 
       <Box className="p-4">
-        {/* User Info */}
+        {/* User Info with Status */}
         <div className="bg-white rounded-lg p-4 mb-4 shadow">
           <div className="flex items-center gap-3">
-            <img 
-              src={user?.avatar_url || '/default-avatar.png'} 
-              alt="Avatar"
-              className="w-12 h-12 rounded-full"
-            />
+            <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg">
+              {session?.user.fullName?.[0] || 'U'}
+            </div>
             <div className="flex-1">
-              <h2 className="font-semibold text-lg">{user?.full_name}</h2>
-              <p className="text-sm text-gray-600 capitalize">{user?.role}</p>
+              <h2 className="font-semibold text-lg">{session?.user.fullName}</h2>
+              <p className="text-sm text-gray-600 capitalize">{session?.user.role}</p>
+            </div>
+            <div className="text-right">
+              <div className={`flex items-center gap-1 text-sm ${isOnline ? 'text-green-600' : 'text-orange-600'}`}>
+                <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-600' : 'bg-orange-600'}`} />
+                {isOnline ? 'Online' : 'Offline'}
+              </div>
+              {queueSize > 0 && (
+                <Text className="text-xs text-gray-500 mt-1">
+                  {queueSize} sự kiện chờ
+                </Text>
+              )}
             </div>
           </div>
         </div>
@@ -190,7 +295,7 @@ export default function HomePage() {
                 : 'bg-white text-gray-700'
             }`}
           >
-            Ghi âm
+            🎤 Ghi âm
           </button>
           <button
             onClick={() => setActiveTab('camera')}
@@ -200,7 +305,17 @@ export default function HomePage() {
                 : 'bg-white text-gray-700'
             }`}
           >
-            Chụp ảnh
+            📷 Chụp ảnh
+          </button>
+          <button
+            onClick={() => setActiveTab('batch')}
+            className={`flex-1 py-3 rounded-lg font-medium transition-colors ${
+              activeTab === 'batch'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-white text-gray-700'
+            }`}
+          >
+            📦 Nhiều SP
           </button>
         </div>
 
@@ -213,16 +328,23 @@ export default function HomePage() {
           <CameraCapture onImageCapture={handleImageCapture} />
         )}
 
+        {activeTab === 'batch' && session && (
+          <BatchInput
+            onSubmit={handleBatchSubmit}
+            accessToken={session.accessToken}
+          />
+        )}
+
         {/* Recent Events */}
-        <div className="mt-6">
-          <h3 className="font-semibold text-lg mb-3">Hoạt động gần đây</h3>
-          <div className="bg-white rounded-lg divide-y">
-            {/* Placeholder for recent events list */}
-            <div className="p-4 text-center text-gray-500 text-sm">
-              Chưa có hoạt động nào
-            </div>
+        {session && (
+          <div className="mt-6">
+            <h3 className="font-semibold text-lg mb-3">Hoạt động gần đây</h3>
+            <RecentEvents
+              userId={session.user.id}
+              accessToken={session.accessToken}
+            />
           </div>
-        </div>
+        )}
       </Box>
     </Page>
   );

@@ -1,36 +1,43 @@
 /**
- * Supabase Edge Function: Process Vision Input
- * Uses Google Vision API for OCR and OpenAI GPT-4o for object counting
+ * Supabase Edge Function: Process Vision Input with Gemini 2.0 Flash
+ * Uses Google Gemini 2.0 Flash for native vision + OCR + validation
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-import { env } from 'https://deno.land/std@0.168.0/dotenv/mod.ts'
+import { env } from 'https://deno.land/std@0.168.0/node/process.ts' // Declaring Deno.env
 
-await env.load()
-
-const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-const googleCloudApiKey = Deno.env.get('GOOGLE_CLOUD_API_KEY')
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const geminiApiKey = env.get('GEMINI_API_KEY')
+const supabaseUrl = env.get('SUPABASE_URL')!
+const supabaseServiceKey = env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 interface VisionProcessingRequest {
   imageUrl: string
-  processingType: 'ocr' | 'counting' | 'both'
-  userId?: string
+  userId: string
+  userName: string
+  locationGLN?: string
 }
 
 interface VisionResult {
-  ocr?: {
-    text: string
-    codes: string[] // GTIN, serial numbers, lot numbers
+  success: boolean
+  extractedData: {
+    eventType: string
+    action: string
+    productName?: string
+    quantity?: number
+    unit?: string
+    location?: string
+    barcodeData?: string
+    detectedObjects: string[]
     confidence: number
   }
-  counting?: {
-    count: number
-    objectType: string
-    confidence: number
+  validation: {
+    valid: boolean
+    errors: string[]
+    warnings: string[]
   }
+  epcisEvent?: any
+  logId?: string
 }
 
 serve(async (req) => {
@@ -44,56 +51,80 @@ serve(async (req) => {
       })
     }
 
-    const { imageUrl, processingType = 'both', userId } = await req.json() as VisionProcessingRequest
+    const { imageUrl, userId, userName, locationGLN } = await req.json() as VisionProcessingRequest
 
-    if (!imageUrl) {
+    if (!imageUrl || !userId) {
       return new Response(
-        JSON.stringify({ error: 'imageUrl is required' }),
+        JSON.stringify({ error: 'imageUrl and userId are required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('[Vision AI] Processing image:', imageUrl, 'Type:', processingType)
+    console.log('[Vision AI] Processing image with Gemini 2.0 Flash:', imageUrl)
+    
+    const startTime = Date.now()
 
-    const result: VisionResult = {}
+    // Process image with Gemini 2.0 Flash
+    const aiResult = await processImageWithGemini(imageUrl)
+    
+    const processingTime = Date.now() - startTime
 
-    // Process OCR if needed
-    if (processingType === 'ocr' || processingType === 'both') {
-      result.ocr = await processOCR(imageUrl)
-    }
+    // Validate extracted data
+    const validation = validateExtractedData(aiResult)
 
-    // Process object counting if needed
-    if (processingType === 'counting' || processingType === 'both') {
-      result.counting = await processObjectCounting(imageUrl)
+    // Map to EPCIS if validation passed
+    let epcisEvent = null
+    if (validation.valid) {
+      epcisEvent = await mapToEPCIS(aiResult, userId, userName, locationGLN)
+      
+      // Save event to database
+      if (epcisEvent) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey)
+        const { data: eventData, error: eventError } = await supabase
+          .from('events')
+          .insert(epcisEvent)
+          .select()
+          .single()
+        
+        if (eventError) {
+          console.error('[Vision AI] Failed to save event:', eventError)
+          validation.errors.push('Failed to save event to database')
+          validation.valid = false
+        } else {
+          console.log('[Vision AI] Event saved:', eventData.id)
+          epcisEvent.id = eventData.id
+        }
+      }
     }
 
     // Log AI processing
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    
-    const { data: logData, error: logError } = await supabase
+    const { data: logData } = await supabase
       .from('ai_processing_logs')
       .insert({
+        event_id: epcisEvent?.id || null,
         processing_type: 'vision',
-        input_data: { imageUrl, processingType },
-        ai_provider: processingType === 'ocr' ? 'google' : 'openai',
-        raw_response: result,
-        confidence_score: result.ocr?.confidence || result.counting?.confidence || 0.8,
-        processing_time_ms: 0,
-        status: 'completed'
+        input_data: { imageUrl },
+        ai_provider: 'gemini',
+        raw_response: aiResult,
+        confidence_score: aiResult.confidence,
+        processing_time_ms: processingTime,
+        status: validation.valid ? 'completed' : 'failed',
+        error_message: validation.errors.join('; ') || null
       })
       .select()
       .single()
 
-    if (logError) {
-      console.error('[Vision AI] Logging error:', logError)
+    const result: VisionResult = {
+      success: validation.valid,
+      extractedData: aiResult,
+      validation,
+      epcisEvent: epcisEvent || undefined,
+      logId: logData?.id
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        ...result,
-        logId: logData?.id
-      }),
+      JSON.stringify(result),
       { 
         headers: { 
           'Content-Type': 'application/json',
@@ -122,112 +153,226 @@ serve(async (req) => {
 })
 
 /**
- * Process OCR using Google Cloud Vision API
+ * Process image using Gemini 2.0 Flash with native vision
  */
-async function processOCR(imageUrl: string) {
+async function processImageWithGemini(imageUrl: string) {
   try {
+    // Fetch image and convert to base64
+    const imageResponse = await fetch(imageUrl)
+    const imageBuffer = await imageResponse.arrayBuffer()
+    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
+    
     const response = await fetch(
-      `https://vision.googleapis.com/v1/images:annotate?key=${googleCloudApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requests: [
-            {
-              image: { source: { imageUri: imageUrl } },
-              features: [
-                { type: 'TEXT_DETECTION', maxResults: 10 },
-                { type: 'DOCUMENT_TEXT_DETECTION', maxResults: 10 }
-              ]
-            }
-          ]
+          contents: [{
+            parts: [
+              {
+                text: `Analyze this image from a supply chain/traceability context. Extract:
+1. Event type (receiving, shipping, production, packing, inspection)
+2. Product information (name, quantity, unit)
+3. Any visible barcodes, QR codes, GTIN numbers, batch/lot numbers
+4. Location information if visible
+5. Count of items/packages
+
+Respond with ONLY valid JSON in this exact format:
+{
+  "eventType": "ObjectEvent or TransformationEvent",
+  "action": "receiving/shipping/production/packing/inspection",
+  "productName": "product name or null",
+  "quantity": number or null,
+  "unit": "kg/bags/boxes/pcs or null",
+  "location": "location name or null",
+  "barcodeData": "detected barcode/QR data or null",
+  "detectedObjects": ["list", "of", "detected", "items"],
+  "confidence": 0.0-1.0
+}`
+              },
+              {
+                inline_data: {
+                  mime_type: 'image/jpeg',
+                  data: base64Image
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            topK: 1,
+            topP: 0.8,
+            maxOutputTokens: 1024,
+            responseMimeType: 'application/json'
+          }
         })
       }
     )
 
     if (!response.ok) {
-      throw new Error('Google Vision API failed')
+      const error = await response.text()
+      console.error('[Gemini] API error:', error)
+      throw new Error('Gemini API failed')
     }
 
     const data = await response.json()
-    const textAnnotations = data.responses[0]?.textAnnotations || []
-    
-    const fullText = textAnnotations[0]?.description || ''
-    
-    // Extract GS1 codes (GTIN, SSCC, GLN, etc.)
-    const gtinRegex = /\b\d{8,14}\b/g
-    const codes = fullText.match(gtinRegex) || []
+    const resultText = data.candidates[0].content.parts[0].text
+    const result = JSON.parse(resultText)
 
-    console.log('[Vision AI] OCR detected text:', fullText)
-    console.log('[Vision AI] OCR detected codes:', codes)
+    console.log('[Gemini] Extracted data:', result)
 
-    return {
-      text: fullText,
-      codes: [...new Set(codes)], // Remove duplicates
-      confidence: textAnnotations[0]?.confidence || 0.8
-    }
+    return result
   } catch (error) {
-    console.error('[Vision AI] OCR error:', error)
+    console.error('[Gemini] Processing error:', error)
     throw error
   }
 }
 
 /**
- * Process object counting using GPT-4o Vision
+ * Validate extracted data
  */
-async function processObjectCounting(imageUrl: string) {
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert at counting objects in images for supply chain management. Count the number of items/products visible and identify what they are. Respond ONLY with valid JSON: {"count": number, "objectType": "description", "confidence": 0.0-1.0}'
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Count the number of items in this image and identify what they are.'
-              },
-              {
-                type: 'image_url',
-                image_url: { url: imageUrl }
-              }
-            ]
-          }
-        ],
-        max_tokens: 300,
-        temperature: 0.2,
-        response_format: { type: 'json_object' }
-      }),
-    })
+function validateExtractedData(data: any): { valid: boolean; errors: string[]; warnings: string[] } {
+  const errors: string[] = []
+  const warnings: string[] = []
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('[Vision AI] GPT-4o error:', error)
-      throw new Error('Object counting failed')
+  // Required fields
+  if (!data.eventType) {
+    errors.push('Event type is required')
+  }
+
+  if (!data.action) {
+    errors.push('Action is required')
+  }
+
+  // Check confidence score
+  if (data.confidence < 0.6) {
+    warnings.push(`Low confidence score: ${data.confidence}. Consider manual review.`)
+  }
+
+  // Validate quantity and unit together
+  if (data.quantity && !data.unit) {
+    warnings.push('Quantity specified without unit')
+  }
+
+  // Validate barcode if present
+  if (data.barcodeData) {
+    // Basic GS1 validation
+    const gtinMatch = data.barcodeData.match(/\d{8,14}/)
+    if (!gtinMatch) {
+      warnings.push('Barcode data does not contain valid GTIN format')
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  }
+}
+
+/**
+ * Map AI data to EPCIS event structure
+ */
+async function mapToEPCIS(aiData: any, userId: string, userName: string, locationGLN?: string) {
+  try {
+    // Determine event type and business step
+    let eventType = 'ObjectEvent'
+    let bizStep = 'observing'
+    let disposition = 'active'
+
+    const action = aiData.action.toLowerCase()
+    
+    if (action.includes('receive')) {
+      bizStep = 'receiving'
+      disposition = 'in_progress'
+    } else if (action.includes('ship')) {
+      bizStep = 'shipping'
+      disposition = 'in_transit'
+    } else if (action.includes('production') || action.includes('transform')) {
+      eventType = 'TransformationEvent'
+      bizStep = 'commissioning'
+    } else if (action.includes('pack')) {
+      eventType = 'AggregationEvent'
+      bizStep = 'packing'
+    } else if (action.includes('inspect')) {
+      bizStep = 'inspecting'
     }
 
-    const data = await response.json()
-    const result = JSON.parse(data.choices[0].message.content)
+    // Build EPC from barcode if available
+    let epcList: string[] = []
+    if (aiData.barcodeData) {
+      const gtinMatch = aiData.barcodeData.match(/\d{14}/)
+      if (gtinMatch) {
+        const epc = `urn:epc:id:sgtin:${gtinMatch[0].substring(1, 8)}.${gtinMatch[0].substring(8, 13)}.${Date.now()}`
+        epcList.push(epc)
+      }
+    }
 
-    console.log('[Vision AI] Counting result:', result)
+    // Build EPCIS document
+    const eventId = `urn:uuid:${crypto.randomUUID()}`
+    const eventTime = new Date().toISOString()
+
+    const epcisDocument = {
+      '@context': ['https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld'],
+      type: 'EPCISDocument',
+      schemaVersion: '2.0',
+      creationDate: eventTime,
+      epcisBody: {
+        eventList: [{
+          eventID: eventId,
+          type: eventType,
+          action: 'OBSERVE',
+          eventTime,
+          eventTimeZoneOffset: '+07:00',
+          recordTime: eventTime,
+          epcList: epcList.length > 0 ? epcList : undefined,
+          bizStep: `https://ns.gs1.org/voc/Bizstep-${bizStep}`,
+          disposition: `https://ns.gs1.org/voc/Disp-${disposition}`,
+          bizLocation: locationGLN ? {
+            id: `urn:epc:id:sgln:${locationGLN.replace(/\D/g, '')}.0`
+          } : undefined,
+          ilmd: {
+            productName: aiData.productName,
+            quantity: aiData.quantity,
+            uom: aiData.unit,
+            recordedBy: userName,
+            sourceSystem: 'vision_ai',
+            aiConfidence: aiData.confidence
+          }
+        }]
+      }
+    }
 
     return {
-      count: result.count || 0,
-      objectType: result.objectType || 'unknown',
-      confidence: result.confidence || 0.7
+      event_type: eventType,
+      event_time: eventTime,
+      event_timezone: 'Asia/Ho_Chi_Minh',
+      epc_list: epcList.length > 0 ? epcList : null,
+      biz_step: bizStep,
+      disposition,
+      read_point: null,
+      biz_location: locationGLN || null,
+      user_id: userId,
+      user_name: userName,
+      source_type: 'vision_ai',
+      input_epc_list: null,
+      output_epc_list: null,
+      input_quantity: null,
+      output_quantity: aiData.quantity ? [{
+        value: aiData.quantity,
+        uom: aiData.unit
+      }] : null,
+      ai_metadata: {
+        confidence_score: aiData.confidence,
+        detected_objects: aiData.detectedObjects,
+        barcode_data: aiData.barcodeData,
+        raw_ai_output: aiData
+      },
+      epcis_document: epcisDocument
     }
   } catch (error) {
-    console.error('[Vision AI] Counting error:', error)
-    throw error
+    console.error('[EPCIS Mapping] Error:', error)
+    return null
   }
 }

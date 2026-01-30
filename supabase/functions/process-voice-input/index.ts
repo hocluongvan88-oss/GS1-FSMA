@@ -1,35 +1,48 @@
 /**
- * Supabase Edge Function: Process Voice Input
- * Uses OpenAI Whisper for speech-to-text and GPT for parsing
+ * Supabase Edge Function: Process Voice Input with Gemini 2.0 Flash
+ * Uses Gemini 2.0 Flash for native audio processing + transcription + EPCIS extraction
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { env } from 'https://deno.land/std@0.168.0/dotenv/mod.ts'
 
-const envData = await env()
-const openaiApiKey = envData['OPENAI_API_KEY']
-const supabaseUrl = envData['SUPABASE_URL']!
-const supabaseServiceKey = envData['SUPABASE_SERVICE_ROLE_KEY']!
+await env.load({ export: true })
+
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 interface VoiceProcessingRequest {
   audioUrl: string
-  userId?: string
-  location?: string
+  userId: string
+  userName: string
+  locationGLN?: string
 }
 
-interface ParsedEventData {
-  action: string // 'harvest', 'pack', 'ship', 'transform', etc.
-  quantity?: number
-  unit?: string
-  product?: string
-  location?: string
-  notes?: string
+interface VoiceResult {
+  success: boolean
+  extractedData: {
+    transcription: string
+    eventType: string
+    action: string
+    productName?: string
+    quantity?: number
+    unit?: string
+    location?: string
+    confidence: number
+  }
+  validation: {
+    valid: boolean
+    errors: string[]
+    warnings: string[]
+  }
+  epcisEvent?: any
+  logId?: string
 }
 
 serve(async (req) => {
   try {
-    // CORS headers
     if (req.method === 'OPTIONS') {
       return new Response('ok', { 
         headers: { 
@@ -39,136 +52,80 @@ serve(async (req) => {
       })
     }
 
-    const { audioUrl, userId, location } = await req.json() as VoiceProcessingRequest
+    const { audioUrl, userId, userName, locationGLN } = await req.json() as VoiceProcessingRequest
 
-    if (!audioUrl) {
+    if (!audioUrl || !userId) {
       return new Response(
-        JSON.stringify({ error: 'audioUrl is required' }),
+        JSON.stringify({ error: 'audioUrl and userId are required' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('[Voice AI] Processing audio from:', audioUrl)
-
-    // Step 1: Download audio file
-    const audioResponse = await fetch(audioUrl)
-    const audioBlob = await audioResponse.blob()
-    const audioBuffer = await audioBlob.arrayBuffer()
-
-    // Step 2: Transcribe with OpenAI Whisper
-    const formData = new FormData()
-    formData.append('file', new Blob([audioBuffer], { type: 'audio/webm' }), 'audio.webm')
-    formData.append('model', 'whisper-1')
-    formData.append('language', 'vi') // Vietnamese
-    formData.append('response_format', 'json')
-
-    const transcriptionResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: formData,
-    })
-
-    if (!transcriptionResponse.ok) {
-      const error = await transcriptionResponse.text()
-      console.error('[Voice AI] Transcription error:', error)
-      throw new Error('Transcription failed')
-    }
-
-    const transcription = await transcriptionResponse.json()
-    const transcript = transcription.text
-
-    console.log('[Voice AI] Transcript:', transcript)
-
-    // Step 3: Parse transcript with GPT to extract structured data
-    const parseResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are an assistant that extracts structured data from farmer/worker voice input for a traceability system.
-Extract the following information from the transcript:
-- action: harvest, pack, ship, receive, transform, inspect (map to EPCIS bizStep)
-- quantity: number
-- unit: kg, ton, box, bag, etc.
-- product: product name (coffee, rice, etc.)
-- location: location mentioned
-- notes: any additional information
-
-Respond ONLY with valid JSON. Example:
-{"action": "harvest", "quantity": 50, "unit": "kg", "product": "cà phê", "location": "vườn A", "notes": "chất lượng tốt"}`
-          },
-          {
-            role: 'user',
-            content: transcript
-          }
-        ],
-        temperature: 0.3,
-        response_format: { type: 'json_object' }
-      }),
-    })
-
-    if (!parseResponse.ok) {
-      console.error('[Voice AI] Parse error:', await parseResponse.text())
-      throw new Error('Parsing failed')
-    }
-
-    const parseResult = await parseResponse.json()
-    const parsedData: ParsedEventData = JSON.parse(parseResult.choices[0].message.content)
-
-    console.log('[Voice AI] Parsed data:', parsedData)
-
-    // Step 4: Map to EPCIS business step
-    const bizStepMap: Record<string, string> = {
-      'harvest': 'commissioning',
-      'pack': 'packing',
-      'ship': 'shipping',
-      'receive': 'receiving',
-      'transform': 'transforming',
-      'inspect': 'inspecting',
-      'observe': 'observing'
-    }
-
-    const bizStep = bizStepMap[parsedData.action?.toLowerCase()] || 'observing'
-
-    // Step 5: Log AI processing
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    console.log('[Voice AI] Processing audio with Gemini 2.0 Flash:', audioUrl)
     
-    const { data: logData, error: logError } = await supabase
+    const startTime = Date.now()
+
+    // Process audio with Gemini 2.0 Flash
+    const aiResult = await processAudioWithGemini(audioUrl)
+    
+    const processingTime = Date.now() - startTime
+
+    // Validate extracted data
+    const validation = validateExtractedData(aiResult)
+
+    // Map to EPCIS if validation passed
+    let epcisEvent = null
+    if (validation.valid) {
+      epcisEvent = await mapToEPCIS(aiResult, userId, userName, locationGLN)
+      
+      // Save event to database
+      if (epcisEvent) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey)
+        const { data: eventData, error: eventError } = await supabase
+          .from('events')
+          .insert(epcisEvent)
+          .select()
+          .single()
+        
+        if (eventError) {
+          console.error('[Voice AI] Failed to save event:', eventError)
+          validation.errors.push('Failed to save event to database')
+          validation.valid = false
+        } else {
+          console.log('[Voice AI] Event saved:', eventData.id)
+          epcisEvent.id = eventData.id
+        }
+      }
+    }
+
+    // Log AI processing
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { data: logData } = await supabase
       .from('ai_processing_logs')
       .insert({
+        event_id: epcisEvent?.id || null,
         processing_type: 'voice',
-        input_data: { audioUrl, transcript },
-        ai_provider: 'openai',
-        raw_response: { transcription, parsedData },
-        confidence_score: 0.85, // Could extract from Whisper confidence
-        processing_time_ms: 0, // Calculate actual time
-        status: 'completed'
+        input_data: { audioUrl },
+        ai_provider: 'gemini',
+        raw_response: aiResult,
+        confidence_score: aiResult.confidence,
+        processing_time_ms: processingTime,
+        status: validation.valid ? 'completed' : 'failed',
+        error_message: validation.errors.join('; ') || null
       })
       .select()
       .single()
 
-    if (logError) {
-      console.error('[Voice AI] Logging error:', logError)
+    const result: VoiceResult = {
+      success: validation.valid,
+      extractedData: aiResult,
+      validation,
+      epcisEvent: epcisEvent || undefined,
+      logId: logData?.id
     }
 
-    // Return structured result
     return new Response(
-      JSON.stringify({
-        success: true,
-        transcript,
-        parsedData,
-        bizStep,
-        confidence: 0.85,
-        logId: logData?.id
-      }),
+      JSON.stringify(result),
       { 
         headers: { 
           'Content-Type': 'application/json',
@@ -195,3 +152,210 @@ Respond ONLY with valid JSON. Example:
     )
   }
 })
+
+/**
+ * Process audio using Gemini 2.0 Flash with native audio support
+ */
+async function processAudioWithGemini(audioUrl: string) {
+  try {
+    // Fetch audio and convert to base64
+    const audioResponse = await fetch(audioUrl)
+    const audioBuffer = await audioResponse.arrayBuffer()
+    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                text: `Transcribe this Vietnamese audio and extract supply chain event information. Extract:
+1. Full transcription (in Vietnamese)
+2. Event type (nhận hàng/receiving, xuất hàng/shipping, sản xuất/production, đóng gói/packing, kiểm tra/inspection)
+3. Product information (tên sản phẩm, số lượng, đơn vị)
+4. Location if mentioned
+
+Respond with ONLY valid JSON in this exact format:
+{
+  "transcription": "full transcription text",
+  "eventType": "ObjectEvent or TransformationEvent",
+  "action": "receiving/shipping/production/packing/inspection",
+  "productName": "product name or null",
+  "quantity": number or null,
+  "unit": "kg/bao/thùng/cái or null",
+  "location": "location name or null",
+  "confidence": 0.0-1.0
+}`
+              },
+              {
+                inline_data: {
+                  mime_type: 'audio/mp3',
+                  data: base64Audio
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            topK: 1,
+            topP: 0.8,
+            maxOutputTokens: 1024,
+            responseMimeType: 'application/json'
+          }
+        })
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('[Gemini] API error:', error)
+      throw new Error('Gemini API failed')
+    }
+
+    const data = await response.json()
+    const resultText = data.candidates[0].content.parts[0].text
+    const result = JSON.parse(resultText)
+
+    console.log('[Gemini] Extracted data:', result)
+
+    return result
+  } catch (error) {
+    console.error('[Gemini] Processing error:', error)
+    throw error
+  }
+}
+
+/**
+ * Validate extracted data
+ */
+function validateExtractedData(data: any): { valid: boolean; errors: string[]; warnings: string[] } {
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  // Required fields
+  if (!data.transcription || data.transcription.length < 10) {
+    errors.push('Transcription too short or missing')
+  }
+
+  if (!data.eventType) {
+    errors.push('Event type is required')
+  }
+
+  if (!data.action) {
+    errors.push('Action is required')
+  }
+
+  // Check confidence score
+  if (data.confidence < 0.6) {
+    warnings.push(`Low confidence score: ${data.confidence}. Consider manual review.`)
+  }
+
+  // Validate quantity and unit together
+  if (data.quantity && !data.unit) {
+    warnings.push('Quantity specified without unit')
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings
+  }
+}
+
+/**
+ * Map AI data to EPCIS event structure
+ */
+async function mapToEPCIS(aiData: any, userId: string, userName: string, locationGLN?: string) {
+  try {
+    // Determine event type and business step
+    let eventType = 'ObjectEvent'
+    let bizStep = 'observing'
+    let disposition = 'active'
+
+    const action = aiData.action.toLowerCase()
+    
+    if (action.includes('receive')) {
+      bizStep = 'receiving'
+      disposition = 'in_progress'
+    } else if (action.includes('ship')) {
+      bizStep = 'shipping'
+      disposition = 'in_transit'
+    } else if (action.includes('production') || action.includes('transform')) {
+      eventType = 'TransformationEvent'
+      bizStep = 'commissioning'
+    } else if (action.includes('pack')) {
+      eventType = 'AggregationEvent'
+      bizStep = 'packing'
+    } else if (action.includes('inspect')) {
+      bizStep = 'inspecting'
+    }
+
+    // Build EPCIS document
+    const eventId = `urn:uuid:${crypto.randomUUID()}`
+    const eventTime = new Date().toISOString()
+
+    const epcisDocument = {
+      '@context': ['https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld'],
+      type: 'EPCISDocument',
+      schemaVersion: '2.0',
+      creationDate: eventTime,
+      epcisBody: {
+        eventList: [{
+          eventID: eventId,
+          type: eventType,
+          action: 'OBSERVE',
+          eventTime,
+          eventTimeZoneOffset: '+07:00',
+          recordTime: eventTime,
+          bizStep: `https://ns.gs1.org/voc/Bizstep-${bizStep}`,
+          disposition: `https://ns.gs1.org/voc/Disp-${disposition}`,
+          bizLocation: locationGLN ? {
+            id: `urn:epc:id:sgln:${locationGLN.replace(/\D/g, '')}.0`
+          } : undefined,
+          ilmd: {
+            productName: aiData.productName,
+            quantity: aiData.quantity,
+            uom: aiData.unit,
+            recordedBy: userName,
+            sourceSystem: 'voice_ai',
+            aiConfidence: aiData.confidence,
+            transcription: aiData.transcription
+          }
+        }]
+      }
+    }
+
+    return {
+      event_type: eventType,
+      event_time: eventTime,
+      event_timezone: 'Asia/Ho_Chi_Minh',
+      epc_list: null,
+      biz_step: bizStep,
+      disposition,
+      read_point: null,
+      biz_location: locationGLN || null,
+      user_id: userId,
+      user_name: userName,
+      source_type: 'voice_ai',
+      input_epc_list: null,
+      output_epc_list: null,
+      input_quantity: null,
+      output_quantity: aiData.quantity ? [{
+        value: aiData.quantity,
+        uom: aiData.unit
+      }] : null,
+      ai_metadata: {
+        confidence_score: aiData.confidence,
+        transcription: aiData.transcription,
+        raw_ai_output: aiData
+      },
+      epcis_document: epcisDocument
+    }
+  } catch (error) {
+    console.error('[EPCIS Mapping] Error:', error)
+    return null
+  }
+}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Be_Vietnam_Pro, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
+import { LocaleProvider } from '@/lib/locale-context'
 
 const beVietnamPro = Be_Vietnam_Pro({ 
   subsets: ["latin", "vietnamese"],
@@ -16,8 +17,8 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Factory Dashboard - GS1 Traceability',
-  description: 'AI-powered traceability platform for supply chain management',
+  title: 'GS1 Traceability Vietnam - Nền tảng Truy xuất Nguồn gốc Nông sản',
+  description: 'Nền tảng truy xuất nguồn gốc chuẩn quốc tế GS1 EPCIS 2.0, tuân thủ FSMA 204 (FDA) và EUDR (EU) cho nông sản Việt Nam. AI-powered food traceability platform for Vietnamese agricultural exports.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -52,7 +53,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <LocaleProvider>
+            {children}
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1127,5 +1127,127 @@
     "noCertifications": "Không có chứng nhận nào liên kết với lô hàng này",
     "createSuccess": "Đã tạo hồ sơ xuất khẩu thành công",
     "downloadSuccess": "Đã tải xuống hồ sơ thành công"
+  },
+  "landing": {
+    "nav": {
+      "features": "Tính năng",
+      "compliance": "Tuân thủ",
+      "solutions": "Giải pháp",
+      "about": "Về chúng tôi",
+      "login": "Đăng nhập",
+      "getStarted": "Bắt đầu ngay"
+    },
+    "hero": {
+      "badge": "Chuẩn GS1 EPCIS 2.0 | Tuân thủ FSMA 204",
+      "title": "Nền tảng Truy xuất Nguồn gốc",
+      "titleHighlight": "cho Nông sản Việt Nam",
+      "subtitle": "Đưa nông sản Việt vươn xa thế giới với hệ thống truy xuất nguồn gốc chuẩn quốc tế. Tích hợp AI thông minh, tuân thủ FSMA 204 (FDA) và EUDR (EU) - sẵn sàng cho mọi thị trường xuất khẩu.",
+      "cta": "Dùng thử miễn phí",
+      "ctaSecondary": "Xem Demo",
+      "trustedBy": "Được tin dùng bởi các doanh nghiệp xuất khẩu hàng đầu"
+    },
+    "stats": {
+      "compliance": "Tuân thủ FSMA 204",
+      "complianceDesc": "Đáp ứng đầy đủ yêu cầu FDA",
+      "faster": "Nhanh hơn 10x",
+      "fasterDesc": "So với nhập liệu thủ công",
+      "accuracy": "99.7% Chính xác",
+      "accuracyDesc": "Nhờ AI kiểm tra tự động",
+      "support": "Hỗ trợ 24/7",
+      "supportDesc": "Đội ngũ chuyên gia sẵn sàng"
+    },
+    "features": {
+      "title": "Giải pháp toàn diện cho chuỗi cung ứng",
+      "subtitle": "Từ nông trại đến bàn ăn - minh bạch từng bước",
+      "voice": {
+        "title": "Nhập liệu bằng Giọng nói",
+        "desc": "Công nhân chỉ cần nói tiếng Việt tự nhiên. AI chuyển đổi thành sự kiện EPCIS chuẩn quốc tế - không cần đào tạo phức tạp."
+      },
+      "vision": {
+        "title": "Nhận diện Hình ảnh AI",
+        "desc": "Chụp ảnh sản phẩm, phiếu xuất kho, tem nhãn. AI tự động trích xuất thông tin và tạo sự kiện truy xuất."
+      },
+      "realtime": {
+        "title": "Theo dõi Thời gian thực",
+        "desc": "Dashboard trực quan hiển thị toàn bộ chuỗi cung ứng. Phát hiện bất thường và cảnh báo kịp thời."
+      },
+      "blockchain": {
+        "title": "Kiểm toán Blockchain",
+        "desc": "Mọi thay đổi được ghi nhận vào sổ cái bất biến. Không ai có thể chỉnh sửa lịch sử - đảm bảo minh bạch tuyệt đối."
+      },
+      "qrcode": {
+        "title": "GS1 Digital Link",
+        "desc": "Mã QR thông minh theo chuẩn GS1. Người tiêu dùng quét là biết toàn bộ hành trình sản phẩm."
+      },
+      "export": {
+        "title": "Hồ sơ Xuất khẩu Tự động",
+        "desc": "Tự động tạo hồ sơ tuân thủ FSMA 204 (FDA Mỹ) và EUDR (Châu Âu). Sẵn sàng cho mọi thị trường."
+      }
+    },
+    "compliance": {
+      "title": "Tuân thủ Chuẩn Quốc tế",
+      "subtitle": "Một nền tảng - Đa tiêu chuẩn",
+      "gs1": {
+        "title": "GS1 EPCIS 2.0",
+        "desc": "Chuẩn quốc tế về truy xuất nguồn gốc. Hỗ trợ đầy đủ 4 loại sự kiện: Object, Aggregation, Transformation, Transaction."
+      },
+      "fsma": {
+        "title": "FSMA 204 (FDA)",
+        "desc": "Tuân thủ quy định truy xuất thực phẩm của Mỹ. Ghi nhận đầy đủ KDE: Harvest Date, Cooling, TLC."
+      },
+      "eudr": {
+        "title": "EUDR (Châu Âu)",
+        "desc": "Đáp ứng quy định chống phá rừng của EU. Chứng minh nguồn gốc hợp pháp cho cà phê, cacao, gỗ."
+      },
+      "iso": {
+        "title": "ISO 22000",
+        "desc": "Tích hợp với hệ thống quản lý an toàn thực phẩm. Hỗ trợ HACCP và các tiêu chuẩn liên quan."
+      }
+    },
+    "industries": {
+      "title": "Giải pháp cho mọi ngành",
+      "subtitle": "Đồng hành cùng nông sản Việt",
+      "coffee": {
+        "title": "Cà phê",
+        "desc": "Từ vườn cà phê Tây Nguyên đến ly espresso tại châu Âu. Chứng minh nguồn gốc, phương pháp canh tác, quy trình chế biến."
+      },
+      "rice": {
+        "title": "Gạo",
+        "desc": "Truy xuất từ ruộng lúa đến bao gạo xuất khẩu. Ghi nhận giống lúa, vùng trồng, quy trình xay xát."
+      },
+      "seafood": {
+        "title": "Thủy sản",
+        "desc": "Từ ao nuôi đến container xuất khẩu. Theo dõi nguồn giống, thức ăn, môi trường nuôi trồng."
+      },
+      "fruits": {
+        "title": "Trái cây",
+        "desc": "Thanh long, xoài, vải thiều... Ghi nhận ngày thu hoạch, quy trình làm lạnh, đóng gói xuất khẩu."
+      }
+    },
+    "cta": {
+      "title": "Sẵn sàng vươn tầm quốc tế?",
+      "subtitle": "Bắt đầu miễn phí trong 5 phút. Không cần thẻ tín dụng.",
+      "button": "Đăng ký miễn phí",
+      "demo": "Hoặc đặt lịch demo với chuyên gia"
+    },
+    "footer": {
+      "tagline": "Nền tảng truy xuất nguồn gốc chuẩn quốc tế cho nông sản Việt Nam",
+      "product": "Sản phẩm",
+      "company": "Công ty",
+      "resources": "Tài nguyên",
+      "legal": "Pháp lý",
+      "features": "Tính năng",
+      "pricing": "Bảng giá",
+      "integrations": "Tích hợp",
+      "about": "Về chúng tôi",
+      "careers": "Tuyển dụng",
+      "partners": "Đối tác",
+      "docs": "Tài liệu",
+      "guides": "Hướng dẫn",
+      "support": "Hỗ trợ",
+      "privacy": "Quyền riêng tư",
+      "terms": "Điều khoản",
+      "copyright": "2026 GS1 Traceability Vietnam. Bảo lưu mọi quyền."
+    }
   }
 }
