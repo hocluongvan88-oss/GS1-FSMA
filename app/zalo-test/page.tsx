@@ -49,8 +49,8 @@ export default function ZaloTestPage() {
     console.log('[v0] Testing voice input:', voiceInput)
 
     try {
-      // Use Next.js API route instead of Supabase Edge Function
-      const response = await fetch('/api/voice/process', {
+      // Use Next.js API route with updated Gemini model
+      const response = await fetch('/api/voice/process-new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
