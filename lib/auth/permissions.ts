@@ -313,7 +313,7 @@ export const roleDescriptions: Record<UserRole, string> = {
   factory_manager: 'Quản lý hoạt động sản xuất tại nhà máy',
   quality_inspector: 'Kiểm tra và phê duyệt chất lượng sản phẩm',
   logistics_manager: 'Quản lý vận chuyển và chuỗi cung ứng',
-  worker: 'Nhập dữ liệu sản xuất và sự kiện',
+  worker: 'Nhập dữ liệu sản xuất và sự ki���n',
   farmer: 'Nhập dữ liệu canh tác và thu hoạch',
   auditor: 'Xem và kiểm toán dữ liệu (chỉ đọc)',
   customer: 'Xem thông tin truy xuất nguồn gốc',

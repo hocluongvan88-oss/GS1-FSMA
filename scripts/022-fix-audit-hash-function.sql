@@ -1,6 +1,7 @@
 -- ============================================
 -- FIX AUDIT HASH FUNCTION TYPE CASTING
--- Sửa lỗi: function generate_audit_hash không nhận kiểu NAME
+-- Sửa lỗi: function generate_audit_hash yêu cầu UUID nhưng nhận TEXT
+-- Solution: Change function signature to accept TEXT for entity_id
 -- ============================================
 
 -- Drop và tạo lại trigger function với type casting đúng
@@ -10,6 +11,33 @@ DROP TRIGGER IF EXISTS audit_certifications_changes ON certifications;
 DROP TRIGGER IF EXISTS audit_shipments_changes ON shipments;
 
 DROP FUNCTION IF EXISTS create_audit_log() CASCADE;
+DROP FUNCTION IF EXISTS generate_audit_hash(BIGINT, TEXT, TEXT, UUID, JSONB, TIMESTAMPTZ) CASCADE;
+
+-- 1. RECREATE HASH FUNCTION WITH TEXT FOR ENTITY_ID
+CREATE OR REPLACE FUNCTION generate_audit_hash(
+  block_num BIGINT,
+  prev_hash TEXT,
+  entity_type_val TEXT,
+  entity_id_val TEXT,  -- Changed from UUID to TEXT
+  payload_val JSONB,
+  timestamp_val TIMESTAMPTZ
+)
+RETURNS TEXT AS $$
+BEGIN
+  RETURN encode(
+    digest(
+      block_num::TEXT || 
+      COALESCE(prev_hash, 'genesis') || 
+      entity_type_val || 
+      entity_id_val || 
+      payload_val::TEXT || 
+      extract(epoch from timestamp_val)::TEXT,
+      'sha256'
+    ),
+    'hex'
+  );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
 -- 3. AUTO-CREATE AUDIT LOG TRIGGER (với type casting)
 CREATE OR REPLACE FUNCTION create_audit_log()
@@ -65,17 +93,17 @@ BEGIN
     END CASE;
   END IF;
   
-  -- Generate hash for new block (với ::TEXT casting)
+  -- Generate hash for new block (cast both TG_TABLE_NAME and id to TEXT)
   new_hash := generate_audit_hash(
     (SELECT COALESCE(MAX(block_number), 0) + 1 FROM audit_log),
     prev_hash_val,
     TG_TABLE_NAME::TEXT,  -- Cast NAME to TEXT
-    COALESCE(NEW.id, OLD.id),
+    COALESCE(NEW.id, OLD.id)::TEXT,  -- Cast ID to TEXT
     to_jsonb(COALESCE(NEW, OLD)),
     NOW()
   );
   
-  -- Insert audit log (với ::TEXT casting)
+  -- Insert audit log (cast all IDs to TEXT for consistency)
   INSERT INTO audit_log (
     event_id,
     action_type,
@@ -86,10 +114,10 @@ BEGIN
     previous_hash,
     current_hash
   ) VALUES (
-    CASE WHEN TG_TABLE_NAME = 'events' THEN COALESCE(NEW.id, OLD.id) ELSE NULL END,
+    CASE WHEN TG_TABLE_NAME = 'events' THEN COALESCE(NEW.id, OLD.id)::TEXT ELSE NULL END,  -- Cast to TEXT
     action_type_val,
     TG_TABLE_NAME::TEXT,  -- Cast NAME to TEXT
-    COALESCE(NEW.id, OLD.id),
+    COALESCE(NEW.id, OLD.id)::TEXT,  -- Cast ID to TEXT
     to_jsonb(COALESCE(NEW, OLD)),
     auth.uid(),
     prev_hash_val,
@@ -210,4 +238,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION create_audit_log IS 'Fixed version with proper type casting for TG_TABLE_NAME';
+COMMENT ON FUNCTION generate_audit_hash IS 'Updated to accept TEXT for entity_id (supports UUID, BIGINT, etc)';
+COMMENT ON FUNCTION create_audit_log IS 'Fixed version with proper type casting for TG_TABLE_NAME and entity_id';

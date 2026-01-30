@@ -9,7 +9,7 @@
 
 ## 1. TỔNG QUAN HỆ THỐNG
 
-### 1.1. Cấu trúc dự án
+### 1.1. Cấu trúc d�� án
 \`\`\`
 zalo-mini-app/
 ├── components/

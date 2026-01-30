@@ -54,11 +54,12 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_user ON audit_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_created ON audit_log(created_at DESC);
 
 -- 2. HASH GENERATION FUNCTION
+-- Updated to accept TEXT for entity_id to support different ID types (UUID, BIGINT, etc.)
 CREATE OR REPLACE FUNCTION generate_audit_hash(
   block_num BIGINT,
   prev_hash TEXT,
   entity_type_val TEXT,
-  entity_id_val UUID,
+  entity_id_val TEXT,
   payload_val JSONB,
   timestamp_val TIMESTAMPTZ
 )
@@ -138,7 +139,7 @@ BEGIN
     (SELECT COALESCE(MAX(block_number), 0) + 1 FROM audit_log),
     prev_hash_val,
     TG_TABLE_NAME::TEXT,
-    COALESCE(NEW.id, OLD.id),
+    COALESCE(NEW.id, OLD.id)::TEXT,
     to_jsonb(COALESCE(NEW, OLD)),
     NOW()
   );
@@ -154,10 +155,10 @@ BEGIN
     previous_hash,
     current_hash
   ) VALUES (
-    CASE WHEN TG_TABLE_NAME = 'events' THEN COALESCE(NEW.id, OLD.id) ELSE NULL END,
+    CASE WHEN TG_TABLE_NAME = 'events' THEN COALESCE(NEW.id, OLD.id)::TEXT ELSE NULL END,
     action_type_val,
     TG_TABLE_NAME::TEXT,
-    COALESCE(NEW.id, OLD.id),
+    COALESCE(NEW.id, OLD.id)::TEXT,
     to_jsonb(COALESCE(NEW, OLD)),
     auth.uid(), -- Use auth.uid() directly since not all tables have user_id column
     prev_hash_val,

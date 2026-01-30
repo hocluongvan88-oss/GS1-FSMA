@@ -178,7 +178,7 @@
     "compliance": {
       "title": "Báo cáo tuân thủ",
       "gs1Standards": "Tuân thủ tiêu chuẩn GS1",
-      "epcisCompliance": "Tuân thủ EPCIS 2.0",
+      "epcisCompliance": "Tu��n thủ EPCIS 2.0",
       "epcisComplianceDesc": "Tiêu chuẩn ghi nhận sự kiện và truy xuất nguồn gốc",
       "requiresCommissioning": "Yêu cầu đăng ký ban đầu",
       "eventsWithCertifications": "Sự kiện có chứng nhận",
@@ -1022,7 +1022,7 @@
       "certificationInfo": "Thông tin chứng nhận"
     },
     "generating": "Đang tạo...",
-    "generateQR": "Tạo mã QR & URL rút gọn",
+    "generateQR": "T��o mã QR & URL rút gọn",
     "generateSuccess": "Đã tạo mã QR thành công",
     "historyTitle": "Digital Links đã tạo",
     "historyDesc": "Các mã QR và URL rút gọn đã tạo trước đây",

@@ -316,7 +316,7 @@ User Login → Supabase Auth → JWT Token → Middleware Check → RLS Policies
 \`\`\`typescript
 ✅ Try-catch blocks trong tất cả API routes
 ✅ Descriptive error messages
-✅ Proper HTTP status codes (400, 401, 403, 500)
+�� Proper HTTP status codes (400, 401, 403, 500)
 ✅ Console logging với [v0] prefix
 \`\`\`
 

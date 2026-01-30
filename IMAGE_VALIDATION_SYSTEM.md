@@ -51,7 +51,7 @@ Hệ thống tự động từ chối ảnh không liên quan đến chuỗi cun
 #### 1. Sản phẩm đóng gói
 - Hộp, túi, bao bì có nhãn
 - Thùng carton có mã vạch
-- Bao xi măng, phân bón có in thông tin
+- Bao xi măng, ph��n bón có in thông tin
 
 **Ví dụ:** Thùng sữa, bao gạo, chai nước mắm
 

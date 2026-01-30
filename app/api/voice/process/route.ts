@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
       }, { headers: CORS_HEADERS })
     }
 
-    // Use Gemini to extract structured data with latest version
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
+    // Use Gemini to extract structured data (v1beta compatible)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     
     const prompt = `Analyze this Vietnamese supply chain input and extract structured data.
 
