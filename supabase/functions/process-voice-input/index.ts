@@ -12,6 +12,13 @@ const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+// CORS Headers - Required for browser/Zalo access
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(geminiApiKey!)
 
@@ -44,22 +51,22 @@ interface VoiceResult {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight immediately - CRITICAL for browser/Zalo access
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { 
-        headers: { 
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        } 
-      })
-    }
 
     const { audioUrl, userId, userName, locationGLN } = await req.json() as VoiceProcessingRequest
 
     if (!audioUrl || !userId) {
       return new Response(
         JSON.stringify({ error: 'audioUrl and userId are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
@@ -129,10 +136,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify(result),
       { 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
 
@@ -146,10 +150,7 @@ serve(async (req) => {
       }),
       { 
         status: 500, 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
   }
