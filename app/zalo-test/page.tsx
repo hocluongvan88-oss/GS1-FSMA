@@ -517,9 +517,12 @@ export default function ZaloTestPage() {
                     <div>
                       <span className="text-gray-600">Products:</span> {event.epc_list?.length || 0} items
                     </div>
-                    {event.quantity_list && (
+                    {(event.quantity_list || event.input_quantity || event.output_quantity) && (
                       <div className="col-span-2">
-                        <span className="text-gray-600">Quantity:</span> {JSON.stringify(event.quantity_list)}
+                        <span className="text-gray-600">Quantity:</span>{' '}
+                        {event.quantity_list && JSON.stringify(event.quantity_list)}
+                        {event.input_quantity && `Input: ${JSON.stringify(event.input_quantity)}`}
+                        {event.output_quantity && ` Output: ${JSON.stringify(event.output_quantity)}`}
                       </div>
                     )}
                   </div>

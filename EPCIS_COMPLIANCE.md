@@ -270,7 +270,7 @@ Object → Transformation → Aggregation → Transaction
 
 ## Kết luận
 
-Hệ thống **ĐÃ TUÂN THỦ ĐẦY ĐỦ** quy chuẩn GS1 EPCIS 2.0 cho truy xuất nguồn gốc sản phẩm.
+Hệ thống **ĐÃ TUÂN THỦ ĐẦY ĐỦ** quy chuẩn GS1 EPCIS 2.0 cho truy xuất ngu��n gốc sản phẩm.
 
 Các vấn đề đã được fix:
 1. ✅ Trace path direction (đã đảo ngược để hiển thị đúng Origin → Current)

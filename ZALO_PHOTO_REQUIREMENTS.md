@@ -234,7 +234,7 @@ Chụp:
    - Lau sạch ống kính camera
 
 2. **Trong khi chụp:**
-   - Giữ máy thật vững (không rung)
+   - Gi�� máy thật vững (không rung)
    - Chụp nhiều góc độ khác nhau
    - Focus vào điểm quan trọng (barcode, số lượng)
 

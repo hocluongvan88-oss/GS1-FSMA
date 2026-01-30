@@ -256,22 +256,29 @@ CREATE TRIGGER batch_quality_check_notification
 -- Create notification when a new EPCIS event is created
 CREATE OR REPLACE FUNCTION notify_event_created()
 RETURNS TRIGGER AS $$
+DECLARE
+  user_exists BOOLEAN;
 BEGIN
-    -- Notify the user who created the event
-    IF NEW.user_id IS NOT NULL THEN
-        PERFORM create_notification(
-            NEW.user_id,
-            'event_created',
-            'Event Created Successfully',
-            'Your ' || NEW.event_type || ' event has been recorded',
-            'normal',
-            'event',
-            NEW.id,
-            '/events/' || NEW.id
-        );
-    END IF;
+  -- Check if user exists before creating notification
+  IF NEW.user_id IS NOT NULL THEN
+    SELECT EXISTS(SELECT 1 FROM public.users WHERE id = NEW.user_id) INTO user_exists;
     
-    RETURN NEW;
+    -- Only create notification if user exists
+    IF user_exists THEN
+      PERFORM create_notification(
+        NEW.user_id::UUID,
+        'event_created'::TEXT,
+        'Event Created Successfully'::TEXT,
+        ('Your ' || NEW.event_type || ' event has been recorded')::TEXT,
+        'normal'::TEXT,
+        'event'::TEXT,
+        NEW.id::UUID,
+        ('/events/' || NEW.id::TEXT)::TEXT
+      );
+    END IF;
+  END IF;
+    
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 

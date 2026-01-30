@@ -298,7 +298,7 @@ CREATE TABLE ai_processing_logs (
 
 ---
 
-## 3. T��NH NĂNG THIẾU
+## 3. TÍNH NĂNG THIẾU
 
 ### 3.1. Offline Support ❌
 

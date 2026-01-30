@@ -85,7 +85,7 @@ Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yê
 - ✅ Duyệt ngược từ Output EPC về Input EPC
 - ✅ Xử lý được nhiều lớp chế biến (Thóc → Gạo → Bánh gạo)
 - ✅ Hỗ trợ cả input_quantity và output_quantity
-- ✅ Logic đ�� quy hoạt động với depth limit = 10
+- ✅ Logic đệ quy hoạt động với depth limit = 10
 
 **Khuyến nghị:** KHÔNG CẦN SỬA
 
