@@ -199,7 +199,7 @@ export default function ZaloPreviewPage() {
           <div className="p-4 border-b bg-muted/30">
             <h3 className="font-semibold flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              Hoạt động gần ��ây
+              Hoạt động gần đây
             </h3>
           </div>
           <div className="divide-y">

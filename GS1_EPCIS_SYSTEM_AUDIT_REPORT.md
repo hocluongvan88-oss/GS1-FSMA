@@ -22,7 +22,7 @@ Hệ thống đã xây dựng được **nền tảng truy xuất nguồn gốc 
 
 Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yêu cầu FSMA 204 và EUDR:
 
-| Vấn đề | Mức độ | Ảnh hưởng |
+| V��n đề | Mức độ | Ảnh hưởng |
 |--------|--------|-----------|
 | Thiếu Commissioning Event riêng biệt | **NGHIÊM TRỌNG** | Không track được nguồn gốc ban đầu |
 | Thiếu Cooling Event | **CAO** | Vi phạm yêu cầu FSMA 204 cho trái cây tươi |
@@ -688,7 +688,7 @@ END;
 $$ LANGUAGE plpgsql;
 \`\`\`
 
-**M��c độ ưu tiên:** 🟠 **CAO** - Bắt buộc cho product recall compliance
+**Mức độ ưu tiên:** 🟠 **CAO** - Bắt buộc cho product recall compliance
 
 ---
 

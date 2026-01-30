@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS ai_processing_queue (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
   -- Job Details
-  job_type TEXT NOT NULL CHECK (job_type IN ('voice_transcription', 'vision_ocr', 'vision_counting', 'nlp_extraction')),
+  job_type TEXT NOT NULL CHECK (job_type IN ('voice_transcription', 'vision_ocr', 'vision_counting', 'nlp_extraction', 'validation')),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'review_required')),
   priority INTEGER DEFAULT 5, -- 1 (highest) to 10 (lowest)
   

@@ -153,7 +153,7 @@ Depth 4: Object → Transformation → Aggregation → Transaction
 ### 5.2 Event Type Flow
 
 **Component logic:**
-- ✅ Build flow summary từ links gi��a các events
+- ✅ Build flow summary từ links giữa các events
 - ✅ Hiển thị với badges màu theo event type
 - ✅ Show count của mỗi connection type
 
