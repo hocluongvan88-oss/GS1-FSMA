@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { PermissionGate } from '@/components/auth/permission-gate'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,20 +11,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Users, Search, Shield, Edit, Trash2, CheckCircle2, XCircle } from 'lucide-react'
+import { Users, Search, Shield, Edit } from 'lucide-react'
 import { roleNames, roleDescriptions, type UserRole } from '@/lib/auth/permissions'
 import { toast } from 'sonner'
 
 interface User {
   id: string
-  email: string
+  email: string | null
   full_name: string
   phone: string
   role: UserRole
   assigned_location: string
   created_at: string
-  metadata: any
+  metadata: Record<string, unknown>
 }
+
+// Get singleton client at module level
+const supabase = createClient()
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([])
@@ -32,40 +35,46 @@ export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const isMounted = useRef(true)
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
-      const supabase = createClient()
-      
-      const { data: authUsers } = await supabase.auth.admin.listUsers()
-      const { data: userProfiles } = await supabase
+      // Query directly from users table - email is stored there
+      const { data: userProfiles, error } = await supabase
         .from('users')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (authUsers && userProfiles) {
-        const combinedUsers = userProfiles.map(profile => ({
-          ...profile,
-          email: authUsers.users.find(u => u.id === profile.id)?.email || 'N/A'
-        }))
-        setUsers(combinedUsers)
+      if (!isMounted.current) return
+      if (error) throw error
+
+      if (userProfiles) {
+        setUsers(userProfiles)
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      // Ignore AbortError - happens when component unmounts during fetch
+      if (error instanceof Error && error.name === 'AbortError') return
+      if (!isMounted.current) return
       console.error('[v0] Error fetching users:', error)
       toast.error('Failed to load users')
     } finally {
-      setLoading(false)
+      if (isMounted.current) {
+        setLoading(false)
+      }
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    isMounted.current = true
+    fetchUsers()
+    
+    return () => {
+      isMounted.current = false
+    }
+  }, [fetchUsers])
 
   const handleUpdateRole = async (userId: string, newRole: UserRole) => {
     try {
-      const supabase = createClient()
-      
       const { error } = await supabase
         .from('users')
         .update({ role: newRole })
@@ -83,8 +92,8 @@ export default function UserManagementPage() {
   }
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
     const matchesRole = roleFilter === 'all' || user.role === roleFilter
     return matchesSearch && matchesRole
   })
@@ -183,7 +192,7 @@ export default function UserManagementPage() {
                       filteredUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell className="font-medium">{user.full_name}</TableCell>
-                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.email || '-'}</TableCell>
                           <TableCell>{user.phone || '-'}</TableCell>
                           <TableCell>
                             <Badge className={getRoleBadgeColor(user.role)}>

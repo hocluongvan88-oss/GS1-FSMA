@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/data/supabase-client'
+import { useEffect, useState, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import type { UserRole, Permission } from './permissions'
 import { hasPermission, hasAnyPermission, hasAllPermissions } from './permissions'
 
@@ -13,8 +13,11 @@ export interface User {
   phone?: string
   avatar_url?: string
   assigned_location?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
+
+// Get singleton client at module level to ensure single instance
+const supabase = createClient()
 
 /**
  * Hook to get current user and role
@@ -22,13 +25,16 @@ export interface User {
 export function useUser() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const isMounted = useRef(true)
 
   useEffect(() => {
-    const supabase = createClient()
-
+    isMounted.current = true
+    
     const fetchUser = async () => {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser()
+
+        if (!isMounted.current) return
 
         if (authUser) {
           const { data: userData } = await supabase
@@ -36,6 +42,8 @@ export function useUser() {
             .select('*')
             .eq('id', authUser.id)
             .single()
+
+          if (!isMounted.current) return
 
           if (userData) {
             setUser({
@@ -48,23 +56,41 @@ export function useUser() {
               assigned_location: userData.assigned_location,
               metadata: userData.metadata,
             })
+          } else {
+            setUser(null)
           }
+        } else {
+          setUser(null)
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        // Ignore AbortError - happens when component unmounts during fetch
+        if (error instanceof Error && error.name === 'AbortError') return
+        if (!isMounted.current) return
         console.error('[v0] Error fetching user:', error)
+        setUser(null)
       } finally {
-        setLoading(false)
+        if (isMounted.current) {
+          setLoading(false)
+        }
       }
     }
 
     fetchUser()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      fetchUser()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted.current) {
+        if (session?.user) {
+          fetchUser()
+        } else {
+          setUser(null)
+          setLoading(false)
+        }
+      }
     })
 
     return () => {
+      isMounted.current = false
       subscription.unsubscribe()
     }
   }, [])

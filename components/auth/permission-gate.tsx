@@ -143,15 +143,37 @@ export function RoleBadge() {
 }
 
 /**
- * Simplified component to require a specific permission
+ * Simplified component to require authentication and optionally a specific permission
+ * If no action is provided, it only requires the user to be logged in
  */
 export function RequirePermission({ 
   action, 
   children 
 }: { 
-  action: Permission
+  action?: Permission
   children: React.ReactNode 
 }) {
+  const { user, loading } = useUser()
+
+  if (loading) {
+    return null
+  }
+
+  if (!user) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="size-4" />
+        <AlertTitle>Authentication Required</AlertTitle>
+        <AlertDescription>Please log in to access this feature.</AlertDescription>
+      </Alert>
+    )
+  }
+
+  // If no specific permission required, just check authentication
+  if (!action) {
+    return <>{children}</>
+  }
+
   return (
     <PermissionGate permission={action} showAlert>
       {children}

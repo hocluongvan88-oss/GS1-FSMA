@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { useLocale } from '@/lib/locale-context'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi, enUS } from 'date-fns/locale'
 import { createClient } from '@/lib/supabase/client'
@@ -33,7 +33,8 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
-  const supabase = createClient()
+  // Use useMemo to ensure singleton client instance
+  const supabase = useMemo(() => createClient(), [])
 
   const fetchNotifications = async () => {
     try {

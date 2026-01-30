@@ -47,7 +47,7 @@ Sau khi kiểm tra chi tiết 3 trang **Products**, **Locations**, và **Batches
 ║  - Products (GTIN)     │  ✅ CÓ          │  Audit trail   ║
 ║  - Locations (GLN)     │  ✅ CÓ          │  Audit trail   ║
 ║  - Partners            │  ✅ CÓ          │  Audit trail   ║
-╠═══════════════════════════════════════════════════════════╣
+╠════════════════════════════════════════════���══════════════╣
 ║  Transactional Data:   │                 │                ║
 ║  - Events (EPCIS)      │  ❌ KHÔNG       │  Immutable     ║
 ║  - Audit Logs          │  ❌ KHÔNG       │  Immutable     ║

@@ -189,7 +189,7 @@ export default function ZaloDemoPage() {
       }, index * 100)
     })
 
-    alert(`✅ Đã ghi nhận ${batchItems.length} sản phẩm thành công!`)
+    alert(`��� Đã ghi nhận ${batchItems.length} sản phẩm thành công!`)
     setBatchItems([])
   }
 

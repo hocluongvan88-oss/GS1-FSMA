@@ -20,6 +20,7 @@ import {
   Globe,
   Edit,
   Bug,
+  Ticket,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -79,6 +80,7 @@ const getMenuItems = (t: (key: string) => string) => [
       { titleKey: 'nav.partnersAndCerts', icon: Users, href: '/admin/partners-certs' },
       { titleKey: 'nav.devices', icon: Cpu, href: '/admin/devices' },
       { titleKey: 'nav.nationalPortal', icon: Globe, href: '/admin/national-portal' },
+      { titleKey: 'nav.invitations', icon: Ticket, href: '/admin/invitations', adminOnly: true },
       { titleKey: 'nav.userManagement', icon: UserCog, href: '/admin/users', adminOnly: true },
       { titleKey: 'nav.systemSettings', icon: Settings, href: '/admin/settings', adminOnly: true },
       { titleKey: 'nav.debugTools', icon: Bug, href: '/admin/debug', adminOnly: true },

@@ -239,7 +239,7 @@ Chụp:
    - Focus vào điểm quan trọng (barcode, số lượng)
 
 3. **Sau khi chụp:**
-   - Xem trước preview để đảm bảo rõ ràng
+   - Xem tr��ớc preview để đảm bảo rõ ràng
    - Nếu mờ → chụp lại ngay
    - Đợi AI xử lý và xác nhận kết quả
 

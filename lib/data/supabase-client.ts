@@ -1,21 +1,9 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+// Re-export from the main client to ensure single instance
+// This file exists for backward compatibility with existing imports
+export { createClient } from '@/lib/supabase/client'
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_URL')
-}
-if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error('Missing env.NEXT_PUBLIC_SUPABASE_ANON_KEY')
-}
-
-// Factory function to create Supabase client
-export const createClient = () => {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-// Default instance for convenience
+// Default instance for convenience - uses the same singleton
+import { createClient } from '@/lib/supabase/client'
 export const supabase = createClient()
 
 export type Database = {

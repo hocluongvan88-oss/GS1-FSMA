@@ -72,6 +72,7 @@
     "partnersAndCerts": "Đối tác & Chứng nhận",
     "devices": "Thiết bị & IoT",
     "nationalPortal": "Cổng Quốc gia",
+    "invitations": "Mã mời",
     "userManagement": "Quản lý người dùng",
     "systemSettings": "Cài đặt hệ thống",
     "debugTools": "Debug Tools"
@@ -282,7 +283,7 @@
   "editReason": "Lý do chỉnh sửa",
   "editReasonPlaceholder": "VD: Sửa địa chỉ, cập nhật loại địa điểm...",
   "editReasonRequired": "Vui lòng cung cấp lý do cho việc chỉnh sửa này",
-  "editReasonHint": "Bắt buộc cho lưu vết kiểm toán. Giải thích tại sao thay đổi này được thực hiện.",
+  "editReasonHint": "Bắt buộc cho lưu vết kiểm toán. Giải th��ch tại sao thay đổi này được thực hiện.",
   "createSuccess": "Địa điểm đã được tạo thành công",
   "updateSuccess": "Địa điểm đã được cập nhật thành công",
   "deleteSuccess": "Đã xóa địa điểm",
@@ -723,7 +724,7 @@
       "completed": "Hoàn thành"
     },
     "createButton": "Tạo Event",
-    "saving": "Đang l��u...",
+    "saving": "Đang lưu...",
     "validation": {
       "missingFields": "Thiếu thông tin",
       "requiredFields": "Vui lòng điền đầy đủ các trường bắt buộc"
@@ -1198,7 +1199,7 @@
       },
       "eudr": {
         "title": "EUDR (Châu Âu)",
-        "desc": "Đáp ứng quy định chống phá rừng của EU. Chứng minh nguồn g��c hợp pháp cho cà phê, cacao, gỗ."
+        "desc": "Đáp ứng quy định chống phá rừng của EU. Chứng minh nguồn gốc hợp pháp cho cà phê, cacao, gỗ."
       },
       "iso": {
         "title": "ISO 22000",
