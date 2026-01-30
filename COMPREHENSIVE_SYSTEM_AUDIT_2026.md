@@ -2,7 +2,7 @@
 ## GS1 EPCIS 2.0 FOOD TRACEABILITY PLATFORM
 
 **Ngày kiểm toán:** 26/01/2026  
-**Kiểm toán viên:** v0 AI Professional Auditor  
+**Kiểm toán vi��n:** v0 AI Professional Auditor  
 **Phạm vi:** Toàn bộ hệ thống - Frontend, Backend, Database, Security, Business Logic  
 **Tiêu chuẩn:** GS1 EPCIS 2.0, FSMA 204, ISO 22000, RBAC Security Standards
 
@@ -316,7 +316,7 @@ User Login → Supabase Auth → JWT Token → Middleware Check → RLS Policies
 \`\`\`typescript
 ✅ Try-catch blocks trong tất cả API routes
 ✅ Descriptive error messages
-�� Proper HTTP status codes (400, 401, 403, 500)
+✅ Proper HTTP status codes (400, 401, 403, 500)
 ✅ Console logging với [v0] prefix
 \`\`\`
 
@@ -635,7 +635,7 @@ User tạo batch với product unit = "kg" nhưng nhập quantity = 1000 "piece"
 3. **Audit log** - Scanning large audit_log table
 
 **Optimizations implemented:**
-- ✅ Events table partitioning by month
+- ��� Events table partitioning by month
 - ✅ Batch processing cho validation queue
 - ✅ Pagination trên tất cả list views
 
@@ -1122,7 +1122,7 @@ function tracebackAcrossOrganizations(epc) {
 3. Có manual monitoring
 
 **Cần fix trước khi scale:**
-1. 🔴 Row-level locking cho concurrent updates
+1. ���� Row-level locking cho concurrent updates
 2. 🔴 Rate limiting
 3. 🟠 Caching layer
 4. 🟠 Load testing

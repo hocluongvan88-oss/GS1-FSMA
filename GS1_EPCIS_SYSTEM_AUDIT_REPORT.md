@@ -688,7 +688,7 @@ END;
 $$ LANGUAGE plpgsql;
 \`\`\`
 
-**Mức độ ưu tiên:** 🟠 **CAO** - Bắt buộc cho product recall compliance
+**M��c độ ưu tiên:** 🟠 **CAO** - Bắt buộc cho product recall compliance
 
 ---
 

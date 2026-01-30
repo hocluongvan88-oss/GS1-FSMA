@@ -140,7 +140,7 @@ export default function HomePage() {
       if (result.success) {
         alert(`Đã ghi nhận thành công! Phát hiện: ${result.extractedData.productName || 'N/A'}`);
       } else {
-        alert('L��i: ' + result.validation.errors.join(', '));
+        alert('Lỗi: ' + result.validation.errors.join(', '));
       }
     } catch (error) {
       console.error('[v0] Error processing voice:', error);

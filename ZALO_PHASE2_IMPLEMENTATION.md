@@ -314,7 +314,7 @@ index.tsx (Main Page)
 
 ---
 
-## ��� Code Quality
+## 📝 Code Quality
 
 ### Following Standards
 ✅ TypeScript strict mode
