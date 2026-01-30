@@ -364,7 +364,7 @@ Respond with ONLY valid JSON:
 │  │ - Full   │  │ - JWT    │  │ - Audit trail   │            │
 │  │   EPCIS  │  │   auth   │  │ - Confidence    │            │
 │  │   2.0    │  │ - Zalo   │  │ - Raw response  │            │
-│  │   events │  │   ID     │  │                 │            │
+│  │   events │  │   ID     ���  │                 │            │
 │  └──────────┘  └──────────┘  └────────────────┘            │
 └─────────────────────────────────────────────────────────────┘
 \`\`\`

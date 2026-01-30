@@ -73,7 +73,8 @@
     "devices": "Devices & IoT",
     "nationalPortal": "National Portal",
     "userManagement": "User Management",
-    "systemSettings": "System Settings"
+    "systemSettings": "System Settings",
+    "debugTools": "Debug Tools"
   },
   "dashboard": {
     "title": "GS1 Traceability",

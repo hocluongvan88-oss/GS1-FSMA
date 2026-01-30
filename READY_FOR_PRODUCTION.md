@@ -144,7 +144,7 @@ Hệ thống **Zalo Mini App Traceability** đã được xây dựng hoàn ch�
 │   ├── utils/
 │   │   ├── gs1-parser.ts               # GS1 barcode parser
 │   │   ├── epcis-mapper.ts             # AI → EPCIS mapping
-│   │   └── mass-balance.ts             # Mass balance validation
+│   │   └��─ mass-balance.ts             # Mass balance validation
 │   └── services/
 │       └── traceability-service.ts     # Trace logic
 │

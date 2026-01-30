@@ -73,7 +73,8 @@
     "devices": "Thiết bị & IoT",
     "nationalPortal": "Cổng Quốc gia",
     "userManagement": "Quản lý người dùng",
-    "systemSettings": "Cài đặt hệ thống"
+    "systemSettings": "Cài đặt hệ thống",
+    "debugTools": "Debug Tools"
   },
   "dashboard": {
     "title": "GS1 Traceability",
@@ -167,7 +168,7 @@
       "jobsRequiringReviewDesc": "Kết quả xử lý AI với điểm tin cậy thấp",
       "noJobsReview": "Hiện không có công việc nào cần xem xét",
       "totalProcessed": "Tổng đã xử lý",
-      "avgConfidence": "Độ tin cậy TB",
+      "avgConfidence": "Đ�� tin cậy TB",
       "avgTime": "Thời gian TB",
       "successRate": "Tỷ lệ thành công",
       "confidenceScore": "Điểm tin cậy",
@@ -399,7 +400,7 @@
     },
     "supplyChain": {
       "traceabilityOverview": "Tổng quan truy xuất",
-      "maxTraceDepth": "Độ sâu truy xuất t���i đa",
+      "maxTraceDepth": "Độ sâu truy xuất tối đa",
       "totalChains": "Tổng số chuỗi",
       "fullTraces": "Truy xuất đầy đủ",
       "avgChainLength": "Độ dài chuỗi TB",
@@ -1111,7 +1112,7 @@
     "view": "Xem hồ sơ",
     "download": "Tải PDF",
     "viewTitle": "Chi tiết hồ sơ xuất khẩu",
-    "viewDesc": "Hồ sơ xuất khẩu đầy đủ với chi ti��t tuân thủ",
+    "viewDesc": "Hồ sơ xuất khẩu đầy đủ với chi tiết tuân thủ",
     "batchInfo": "Thông tin lô hàng",
     "batchNumber": "Số lô hàng",
     "productName": "Sản phẩm",

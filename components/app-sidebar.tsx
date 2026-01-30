@@ -19,6 +19,7 @@ import {
   ListChecks,
   Globe,
   Edit,
+  Bug,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -80,6 +81,7 @@ const getMenuItems = (t: (key: string) => string) => [
       { titleKey: 'nav.nationalPortal', icon: Globe, href: '/admin/national-portal' },
       { titleKey: 'nav.userManagement', icon: UserCog, href: '/admin/users', adminOnly: true },
       { titleKey: 'nav.systemSettings', icon: Settings, href: '/admin/settings', adminOnly: true },
+      { titleKey: 'nav.debugTools', icon: Bug, href: '/admin/debug', adminOnly: true },
     ],
   },
 ]

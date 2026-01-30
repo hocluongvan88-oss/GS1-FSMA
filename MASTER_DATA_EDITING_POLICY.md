@@ -56,7 +56,7 @@ Sau khi kiểm tra chi tiết 3 trang **Products**, **Locations**, và **Batches
 ║  - Batches             │  ⚠️ CÓ GIỚ⚠️   │  Conditional   ║
 ║    > Trước production  │  ✅ CÓ          │  Draft mode    ║
 ║    > Đang production   │  ⚠️ LIMITED     │  Chỉ quantity  ║
-║    > Đã shipped        │  ❌ KHÔNG       │  Locked        ║
+║    > Đã shipped        │  ❌ KHÔNG       ��  Locked        ║
 ╚═══════════════════════════════════════════════════════════╝
 \`\`\`
 

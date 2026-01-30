@@ -25,7 +25,7 @@ export default function GuidePage() {
           <h1 className="text-2xl font-bold mb-2">Chào mừng đến với</h1>
           <h2 className="text-3xl font-bold mb-3">Hệ thống Truy xuất nguồn gốc</h2>
           <p className="text-emerald-50">
-            Ghi nhận hoạt động nông nghiệp dễ dàng bằng giọng nói và hình ảnh
+            Ghi nhận hoạt động nông nghiệp dễ dàng bằng giọng nói và hình ���nh
           </p>
         </div>
 

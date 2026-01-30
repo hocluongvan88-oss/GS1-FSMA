@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Search, Filter, Download, Calendar, MapPin, User } from 'lucide-react'
 import { useLocale } from '@/lib/locale-context'
+import { formatEPC, formatQuantity } from '@/lib/utils/epc-formatter'
 
 interface Event {
   id: string
@@ -65,7 +66,7 @@ export default function EventsPage() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('events')
-        .select('*')
+        .select('*, epcis_document')
         .order('event_time', { ascending: false })
         .limit(500)
 
@@ -458,21 +459,70 @@ export default function EventsPage() {
               {selectedEvent.epc_list && (
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold text-sm mb-3">{t('events.epcList')}</h4>
-                  <div className="bg-muted/50 p-3 rounded font-mono text-xs overflow-x-auto">
-                    <pre>{JSON.stringify(selectedEvent.epc_list, null, 2)}</pre>
+                  <div className="space-y-2">
+                    {Array.isArray(selectedEvent.epc_list) ? (
+                      selectedEvent.epc_list.map((epc: string, idx: number) => (
+                        <div key={idx} className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                          <Badge variant="outline" className="shrink-0">{idx + 1}</Badge>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground">{formatEPC(epc)}</p>
+                            <p className="text-xs text-muted-foreground font-mono truncate mt-1">{epc}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="bg-muted/50 p-3 rounded font-mono text-xs overflow-x-auto">
+                        <pre>{JSON.stringify(selectedEvent.epc_list, null, 2)}</pre>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Quantity List */}
-              {selectedEvent.quantity_list && (
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-3">{t('events.quantityList')}</h4>
-                  <div className="bg-muted/50 p-3 rounded font-mono text-xs overflow-x-auto">
-                    <pre>{JSON.stringify(selectedEvent.quantity_list, null, 2)}</pre>
-                  </div>
-                </div>
-              )}
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm mb-3">{t('events.quantityList')}</h4>
+                {(() => {
+                  // Try to get quantity from multiple sources
+                  let quantityData = selectedEvent.quantity_list
+                  
+                  // Fallback to epcis_document if quantity_list is empty
+                  if ((!quantityData || (Array.isArray(quantityData) && quantityData.length === 0)) && (selectedEvent as any).epcis_document) {
+                    const doc = (selectedEvent as any).epcis_document
+                    quantityData = doc?.epcisBody?.eventList?.[0]?.quantityList
+                  }
+                  
+                  if (Array.isArray(quantityData) && quantityData.length > 0) {
+                    return (
+                      <div className="space-y-2">
+                        {quantityData.map((q: any, idx: number) => (
+                          <div key={idx} className="flex items-center gap-2 p-3 bg-green-500/5 border border-green-500/20 rounded">
+                            <div className="w-8 h-8 bg-green-500/10 rounded flex items-center justify-center">
+                              <span className="text-green-600 font-semibold">{idx + 1}</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-base font-semibold text-green-600">
+                                {q.quantity || q.value || 0} {q.uom || q.unit || ''}
+                              </p>
+                              {q.epcClass && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {q.epcClass.split('.').pop()?.replace(/_/g, ' ')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  } else {
+                    return (
+                      <div className="p-3 bg-muted/50 rounded text-sm text-muted-foreground text-center">
+                        {t('events.noQuantityData')}
+                      </div>
+                    )
+                  }
+                })()}
+              </div>
 
               {/* Event ID */}
               <div className="p-3 bg-muted/30 rounded text-xs">

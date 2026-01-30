@@ -6,7 +6,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 
 ---
 
-## Các Roles trong hệ th���ng
+## Các Roles trong hệ thống
 
 ### 1. **SYSTEM_ADMIN** - Quản trị hệ thống
 - **Mô tả**: Quyền cao nhất, quản lý toàn bộ hệ thống
@@ -100,7 +100,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 
 **Chú thích:**
 - C = Create, R = Read, U = Update, D = Delete
-- `*` = Có giới hạn (VD: chỉ của mình, chỉ loại specific)
+- `*` = Có giới hạn (VD: chỉ của mình, ch�� loại specific)
 - `-` = Không có quyền
 
 ---
