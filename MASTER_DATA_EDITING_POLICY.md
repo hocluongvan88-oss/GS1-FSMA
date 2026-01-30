@@ -42,7 +42,7 @@ Sau khi kiểm tra chi tiết 3 trang **Products**, **Locations**, và **Batches
 \`\`\`
 ╔═══════════════════════════════════════════════════════════╗
 ║  LOẠI DỮ LIỆU          │  CHO PHÉP SỬA?  │  YÊU CẦU       ║
-╠════════��══════════════════════════════════════════════════╣
+╠═══════════════════════════════════════════════════════════╣
 ║  Master Data:          │                 │                ║
 ║  - Products (GTIN)     │  ✅ CÓ          │  Audit trail   ║
 ║  - Locations (GLN)     │  ✅ CÓ          │  Audit trail   ║

@@ -12,9 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { useLocale } from '@/lib/locale-context'
+import { createClient } from '@/lib/supabase/client' // Declare the createClient variable
 
 interface UserData {
   id: string
@@ -31,17 +32,17 @@ export function SidebarUserMenu() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const supabase = createClient()
+      const supabaseClient = createClient() // Use the declared createClient variable
       
       try {
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+        const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser()
         
         if (authError || !authUser) {
           setLoading(false)
           return
         }
         
-        const { data: userData, error: userError } = await supabase
+        const { data: userData, error: userError } = await supabaseClient
           .from('users')
           .select('id, full_name, role')
           .eq('id', authUser.id)
@@ -73,7 +74,6 @@ export function SidebarUserMenu() {
   }, [])
 
   const handleLogout = async () => {
-    const supabase = createClient()
     await supabase.auth.signOut()
     window.location.href = '/auth/login'
   }

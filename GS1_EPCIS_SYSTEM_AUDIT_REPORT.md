@@ -20,7 +20,7 @@ Hệ thống đã xây dựng được **nền tảng truy xuất nguồn gốc 
 
 ### ⚠️ CÁC VẤN ĐỀ CẦN BỔ SUNG NGAY
 
-Hệ thống **THIẾU các Business Steps & Event Types quan tr���ng** theo yêu cầu FSMA 204 và EUDR:
+Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yêu cầu FSMA 204 và EUDR:
 
 | Vấn đề | Mức độ | Ảnh hưởng |
 |--------|--------|-----------|

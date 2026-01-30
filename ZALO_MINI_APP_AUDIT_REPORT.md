@@ -34,7 +34,7 @@ zalo-mini-app/
 
 ---
 
-## 2. PH��N TÍCH CHI TIẾT
+## 2. PHÂN TÍCH CHI TIẾT
 
 ### 2.1. Authentication Flow ✅
 

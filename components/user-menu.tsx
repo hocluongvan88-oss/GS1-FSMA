@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 
 interface UserData {
   id: string
@@ -22,6 +22,12 @@ interface UserData {
   role: string
 }
 
+const createClient = () => {
+  // Assuming createClient is a function that returns a supabase client
+  // This should be replaced with the actual implementation
+  return supabase;
+};
+
 export function UserMenu() {
   const router = useRouter()
   const [user, setUser] = useState<UserData | null>(null)
@@ -29,10 +35,10 @@ export function UserMenu() {
 
   useEffect(() => {
     const loadUser = async () => {
-      const supabase = createClient()
+      const supabaseClient = createClient()
       
       try {
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+        const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser()
         
         if (authError || !authUser) {
           console.error('[v0] Auth error:', authError)
@@ -41,7 +47,7 @@ export function UserMenu() {
         }
         
         // Query only specific columns to avoid RLS recursion
-        const { data: userData, error: userError } = await supabase
+        const { data: userData, error: userError } = await supabaseClient
           .from('users')
           .select('id, full_name, role')
           .eq('id', authUser.id)
@@ -75,7 +81,6 @@ export function UserMenu() {
   }, [])
 
   const handleLogout = async () => {
-    const supabase = createClient()
     await supabase.auth.signOut()
     window.location.href = '/auth/login'
   }
@@ -160,9 +165,9 @@ export function UserMenu() {
           <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

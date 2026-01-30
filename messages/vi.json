@@ -702,7 +702,7 @@
       "inputHelper": "Các nguyên liệu được sử dụng trong quá trình chế biến",
       "outputEPCs": "Sản phẩm đầu ra",
       "outputEPCsPlaceholder": "Nhập EPC sản phẩm hoàn thành (mỗi dòng 1 EPC)",
-      "outputHelper": "Sản phẩm sau khi chế biến",
+      "outputHelper": "Sản ph���m sau khi chế biến",
       "transformationID": "Mã lô chế biến",
       "transformationIDPlaceholder": "TRANS-2025-001"
     },
@@ -1041,7 +1041,7 @@
   },
   "nationalPortal": {
     "title": "Cổng cư Truy vết Quốc gia",
-    "subtitle": "Đồng bộ dữ liệu v���i cổng truy xuất nguồn gốc quốc gia",
+    "subtitle": "Đồng bộ dữ liệu với cổng truy xuất nguồn gốc quốc gia",
     "connectionStatus": "Trạng thái kết nối",
     "connected": "Đã kết nối",
     "lastSync": "Đồng bộ lần cuối",
@@ -1068,7 +1068,7 @@
   "exportDocs": {
     "title": "Hồ sơ Xuất khẩu",
     "subtitle": "Quản lý hồ sơ xuất khẩu FSMA 204 và EUDR",
-    "create": "Tạo hồ sơ xuất khẩu",
+    "create": "Tạo hồ sơ xu��t khẩu",
     "createTitle": "Tạo hồ sơ xuất khẩu mới",
     "createDesc": "Tạo hồ sơ xuất khẩu tuân thủ quy định",
     "form": {
