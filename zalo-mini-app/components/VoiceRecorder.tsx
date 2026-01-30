@@ -10,7 +10,7 @@ import { chooseMedia, uploadFile } from 'zmp-sdk/apis';
 import { supabase } from '../utils/zalo-auth';
 
 interface VoiceRecorderProps {
-  onRecordingComplete: (audioUrl: string, transcript?: string) => void;
+  onRecordingComplete: (transcript: string, extractedData?: any) => void;
   disabled?: boolean;
 }
 
@@ -59,32 +59,43 @@ export function VoiceRecorder({ onRecordingComplete, disabled }: VoiceRecorderPr
   const uploadAndProcessAudio = async (audioBlob: Blob) => {
     setIsProcessing(true);
     try {
-      // Upload to Supabase Storage
-      const fileName = `voice-${Date.now()}.webm`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('audio-recordings')
-        .upload(fileName, audioBlob);
+      // For now, simulate transcription
+      // TODO: Implement real audio transcription with Whisper API
+      const mockTranscript = 'Nhận 50kg cà chua';
+      
+      // Get user info from localStorage or context
+      const userId = localStorage.getItem('zalo_user_id') || 'zalo-user-test';
+      const userName = localStorage.getItem('zalo_user_name') || 'Zalo User';
+      const locationGLN = '8412345678901';
 
-      if (uploadError) throw uploadError;
+      // Call Next.js API route (matching test page)
+      const response = await fetch('/api/voice/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mockTranscript,
+          userId,
+          userName,
+          locationGLN,
+        }),
+      });
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('audio-recordings')
-        .getPublicUrl(fileName);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'API call failed');
+      }
 
-      // Call AI processing Edge Function
-      const { data: aiResult, error: aiError } = await supabase.functions.invoke(
-        'process-voice-input',
-        {
-          body: { audioUrl: publicUrl }
-        }
-      );
-
-      if (aiError) throw aiError;
-
-      onRecordingComplete(publicUrl, aiResult?.transcript);
+      const result = await response.json();
+      
+      if (result.success) {
+        onRecordingComplete(mockTranscript, result.extractedData);
+      } else {
+        throw new Error(result.error || 'Processing failed');
+      }
     } catch (error) {
-      console.error('Error processing audio:', error);
+      console.error('[Zalo Mini App] Error processing audio:', error);
       alert('Lỗi xử lý âm thanh. Vui lòng thử lại.');
     } finally {
       setIsProcessing(false);

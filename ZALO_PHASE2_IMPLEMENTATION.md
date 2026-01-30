@@ -24,7 +24,7 @@
 />
 \`\`\`
 
-**Mapping v��i database:**
+**Mapping với database:**
 - Mỗi item tạo 1 event riêng trong bảng `events`
 - Sử dụng `ai_metadata.manualData` để lưu thông tin batch
 - Tự động map với `products` table qua GTIN

@@ -54,7 +54,7 @@ Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yê
 **Đánh giá:**
 - ✅ Duyệt từ SSCC (Pallet) xuống childEPCs (Sản phẩm đơn lẻ)
 - ✅ Xử lý được AggregationEvent với action ADD/DELETE
-- ✅ Sử d���ng GIN index cho JSONB query nhanh
+- ✅ Sử dụng GIN index cho JSONB query nhanh
 
 **Khuyến nghị:** KHÔNG CẦN SỬA
 
@@ -850,7 +850,7 @@ CREATE TRIGGER trg_generate_tlc
 
 ---
 
-### 4.2. ✅ GIN Index cho JSONB - ĐỦ
+### 4.2. �� GIN Index cho JSONB - ĐỦ
 
 **Đánh giá:** TỐT ⭐⭐⭐⭐
 

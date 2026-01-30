@@ -104,97 +104,44 @@ export default function HomePage() {
     setQueueSize(offlineQueue.getQueueSize());
   };
 
-  const handleVoiceRecording = async (audioUrl: string) => {
-    if (!session) return;
-
-    const eventData = {
-      audioUrl,
-      userId: session.user.id,
-      userName: session.user.fullName,
-      locationGLN: user?.assigned_location || null
-    };
-
-    // If offline, add to queue
-    if (!isOnline) {
-      offlineQueue.addToQueue('voice', eventData);
-      setQueueSize(offlineQueue.getQueueSize());
-      alert('Đang offline. Sự kiện đã được lưu vào hàng đợi.');
+  const handleVoiceRecording = async (transcript: string, extractedData?: any) => {
+    console.log('[Zalo Mini App] Voice recording complete:', { transcript, extractedData });
+    
+    if (!session) {
+      alert('Vui lòng đăng nhập để tiếp tục');
       return;
     }
-    
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-voice-input`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.accessToken}`
-          },
-          body: JSON.stringify(eventData)
-        }
-      );
 
-      const result = await response.json();
+    if (extractedData) {
+      const productName = extractedData.productName || 'N/A';
+      const quantity = extractedData.quantity || 0;
+      const unit = extractedData.unit || '';
       
-      if (result.success) {
-        alert(`Đã ghi nhận thành công! Phát hiện: ${result.extractedData.productName || 'N/A'}`);
-      } else {
-        alert('Lỗi: ' + result.validation.errors.join(', '));
-      }
-    } catch (error) {
-      console.error('[v0] Error processing voice:', error);
-      // Add to queue on network error
-      offlineQueue.addToQueue('voice', eventData);
-      setQueueSize(offlineQueue.getQueueSize());
-      alert('Lỗi mạng. Đã lưu vào hàng đợi.');
+      alert(`✅ Đã ghi nhận thành công!\n\nSản phẩm: ${productName}\nSố lượng: ${quantity} ${unit}`);
+      
+      // Refresh recent events if component exists
+      // Could trigger a refresh of RecentEvents component here
+    } else {
+      alert('Đã ghi âm nhưng không thể xử lý. Vui lòng thử lại.');
     }
   };
 
-  const handleImageCapture = async (imageUrl: string) => {
-    if (!session) return;
-
-    const eventData = {
-      imageUrl,
-      userId: session.user.id,
-      userName: session.user.fullName,
-      locationGLN: user?.assigned_location || null
-    };
-
-    // If offline, add to queue
-    if (!isOnline) {
-      offlineQueue.addToQueue('vision', eventData);
-      setQueueSize(offlineQueue.getQueueSize());
-      alert('Đang offline. Sự kiện đã được lưu vào hàng đợi.');
+  const handleImageCapture = async (imageUrl: string, result?: any) => {
+    console.log('[Zalo Mini App] Image capture complete:', { imageUrl, result });
+    
+    if (!session) {
+      alert('Vui lòng đăng nhập để tiếp tục');
       return;
     }
-    
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-vision-input`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.accessToken}`
-          },
-          body: JSON.stringify(eventData)
-        }
-      );
 
-      const result = await response.json();
+    if (result && result.success) {
+      const extractedData = result.extractedData || {};
+      const detectedText = extractedData.detectedText || 'N/A';
+      const objectCount = extractedData.objectCount || 0;
       
-      if (result.success) {
-        alert(`Đã ghi nhận thành công! Phát hiện: ${result.extractedData.productName || 'N/A'}`);
-      } else {
-        alert('Lỗi: ' + result.validation.errors.join(', '));
-      }
-    } catch (error) {
-      console.error('[v0] Error processing image:', error);
-      // Add to queue on network error
-      offlineQueue.addToQueue('vision', eventData);
-      setQueueSize(offlineQueue.getQueueSize());
-      alert('Lỗi mạng. Đã lưu vào hàng đợi.');
+      alert(`✅ Đã xử lý ảnh thành công!\n\nVăn bản: ${detectedText}\nĐối tượng: ${objectCount}`);
+    } else {
+      alert('Đã chụp ảnh nhưng không thể xử lý. Vui lòng thử lại.');
     }
   };
 

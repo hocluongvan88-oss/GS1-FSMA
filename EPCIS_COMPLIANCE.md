@@ -77,7 +77,7 @@ Depth 4: Object → Transformation → Aggregation → Transaction
 **Các disposition được sử dụng:**
 - `active`: Sản phẩm đang hoạt động
 - `in_progress`: Đang xử lý
-- `in_transit`: Đang vận chuyển
+- `in_transit`: Đang v��n chuyển
 
 **Tất cả đều thuộc CBV của GS1.**
 

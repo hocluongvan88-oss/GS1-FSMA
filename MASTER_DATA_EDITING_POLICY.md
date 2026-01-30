@@ -57,7 +57,7 @@ Sau khi kiểm tra chi tiết 3 trang **Products**, **Locations**, và **Batches
 ║    > Trước production  │  ✅ CÓ          │  Draft mode    ║
 ║    > Đang production   │  ⚠️ LIMITED     │  Chỉ quantity  ║
 ║    > Đã shipped        │  ❌ KHÔNG       │  Locked        ║
-╚════════════════════��══════════════════════════════════════╝
+╚═══════════════════════════════════════════════════════════╝
 \`\`\`
 
 ### GS1 EPCIS 2.0 Guidelines:

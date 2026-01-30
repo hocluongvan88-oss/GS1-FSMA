@@ -50,37 +50,49 @@ export function CameraCapture({
       const response = await fetch(localPath);
       const blob = await response.blob();
 
-      // Upload to Supabase Storage
-      const fileName = `image-${Date.now()}.jpg`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, blob, {
-          contentType: 'image/jpeg'
-        });
+      // Convert blob to base64 for API
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      
+      const base64Image = await base64Promise;
 
-      if (uploadError) throw uploadError;
+      // Get user info
+      const userId = localStorage.getItem('zalo_user_id') || 'zalo-user-test';
+      const userName = localStorage.getItem('zalo_user_name') || 'Zalo User';
+      const locationGLN = '8412345678901';
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
+      // Call Next.js API route (matching test page)
+      const apiResponse = await fetch('/api/vision/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageBase64: base64Image,
+          processingType,
+          userId,
+          userName,
+          locationGLN,
+        }),
+      });
 
-      // Call Vision AI Edge Function
-      const { data: aiResult, error: aiError } = await supabase.functions.invoke(
-        'process-vision-input',
-        {
-          body: { 
-            imageUrl: publicUrl,
-            processingType 
-          }
-        }
-      );
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json();
+        throw new Error(errorData.error || 'API call failed');
+      }
 
-      if (aiError) throw aiError;
-
-      onImageCapture(publicUrl, aiResult);
+      const result = await apiResponse.json();
+      
+      if (result.success) {
+        onImageCapture(localPath, result);
+      } else {
+        throw new Error(result.error || 'Processing failed');
+      }
     } catch (error) {
-      console.error('Error processing image:', error);
+      console.error('[Zalo Mini App] Error processing image:', error);
       alert('Lỗi xử lý hình ảnh. Vui lòng thử lại.');
     } finally {
       setIsProcessing(false);

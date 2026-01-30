@@ -138,7 +138,7 @@ AI Output → Validation → EPCIS Input → EPCIS Document → Database Event
 - ✅ `epc_list` - Generated from GTIN + serial/lot
 - ✅ `quantity_list` - Structured with EPC, value, UOM
 - ✅ `biz_step` - Mapped to GS1 vocabulary
-- �� `disposition` - Mapped to GS1 vocabulary
+- ✅ `disposition` - Mapped to GS1 vocabulary
 - ✅ `read_point` / `biz_location` - GLN format
 - ✅ `user_id` / `user_name` - From JWT session
 - ✅ `source_type` - voice_ai / vision_ai
