@@ -49,7 +49,7 @@ Files đã sửa:
 
 #### Products Page
 - **Vấn đề:** GTIN duplicate constraint error
-- **Giải pháp:** Thêm duplicate check validation tr��ớc insert
+- **Giải pháp:** Thêm duplicate check validation trước insert
 - **Status:** ✅ Fixed
 
 #### Partners Page

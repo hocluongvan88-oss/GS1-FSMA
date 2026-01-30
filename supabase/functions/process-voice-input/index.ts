@@ -7,7 +7,6 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
 import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts'
-import { Deno } from 'https://deno.land/std@0.168.0/permissions/mod.ts' // Declare Deno variable
 
 // CORS Headers - Required for browser/Zalo access
 const corsHeaders = {
@@ -15,10 +14,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
-
-const supabaseUrl = 'your-supabase-url' // Replace with your Supabase URL
-const supabaseServiceKey = 'your-supabase-service-key' // Replace with your Supabase service key
-const genAI = new GoogleGenerativeAI('your-google-api-key') // Replace with your Google API key
 
 interface VoiceProcessingRequest {
   audioUrl: string

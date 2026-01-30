@@ -57,7 +57,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 - **Mô tả**: Nhân viên sản xuất và nhập liệu
 - **Quyền hạn**:
   - Nhập events qua voice, vision, manual
-  - Xem batches v�� products được giao
+  - Xem batches và products được giao
   - Cập nhật production progress
   - Chỉ xem dữ liệu liên quan đến công việc của mình
 

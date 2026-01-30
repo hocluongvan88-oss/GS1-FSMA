@@ -1,13 +1,12 @@
 /**
  * Supabase Edge Function: Process Vision Input with Gemini 2.0 Flash
- * Uses Google Gemini 2.0 Flash for native vision + OCR + validation
+ * Uses Gemini 2.0 Flash for native vision processing + OCR + EPCIS extraction
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
-import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts'
-import { Deno } from 'https://deno.land/std@0.168.0/runtime.ts' // Declare Deno variable
+import { Deno } from 'https://deno.land/std@0.168.0/io/mod.ts'; // Declaring Deno variable
 
 // CORS Headers - Required for browser/Zalo access
 const corsHeaders = {
@@ -26,14 +25,17 @@ interface VisionProcessingRequest {
 interface VisionResult {
   success: boolean
   extractedData: {
+    description: string
     eventType: string
     action: string
     productName?: string
     quantity?: number
     unit?: string
+    batchNumber?: string
     location?: string
-    barcodeData?: string
-    detectedObjects: string[]
+    isRelevant?: boolean
+    rejectionReason?: string
+    detectedObjects?: string[]
     confidence: number
   }
   validation: {
@@ -44,10 +46,6 @@ interface VisionResult {
   epcisEvent?: any
   logId?: string
 }
-
-const supabaseUrl = 'your_supabase_url_here'
-const supabaseServiceKey = 'your_supabase_service_key_here'
-const genAI = new GoogleGenerativeAI('your_google_generative_ai_key_here')
 
 serve(async (req) => {
   // Handle CORS preflight immediately - CRITICAL for browser/Zalo access
@@ -187,44 +185,26 @@ async function processImageWithGemini(imageUrl: string, genAI: GoogleGenerativeA
     const imageBuffer = await imageResponse.arrayBuffer()
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
 
-    const prompt = `CRITICAL: First determine if this image is relevant to supply chain/traceability.
-
-REJECT if image contains:
-- Faces, people, selfies
-- Landscapes, scenery, nature
-- Personal items (phones, clothes, furniture)
-- Random objects unrelated to products/packaging
-- Food on plates (not packaged products)
-- Pets, animals
-
-ACCEPT if image shows:
-- Product packages, boxes, bags
-- Barcodes, QR codes, labels
-- Products on shelves, pallets, warehouses
-- Manufacturing/production activities
-- Shipping/receiving areas
-- Agricultural products (raw materials)
-
-Analyze this image and extract:
-1. Is this supply chain relevant? (true/false)
-2. Event type (receiving, shipping, production, packing, inspection)
-3. Product information (name, quantity, unit)
-4. Any visible barcodes, QR codes, GTIN numbers, batch/lot numbers
-5. Location information if visible
-6. Count of items/packages
+    const prompt = `Analyze this supply chain image and extract information. Look for:
+1. Product information (tên sản phẩm, labels, packaging)
+2. Quantities (số lượng visible in the image)
+3. Batch/lot numbers (mã lô, batch code)
+4. Event type (receiving, shipping, inspection, production)
+5. Location or warehouse information if visible
 
 Respond with ONLY valid JSON in this exact format:
 {
+  "description": "detailed description of what you see",
   "isRelevant": true or false,
   "rejectionReason": "reason if not relevant, null otherwise",
   "eventType": "ObjectEvent or TransformationEvent",
   "action": "receiving/shipping/production/packing/inspection",
   "productName": "product name or null",
   "quantity": number or null,
-  "unit": "kg/bags/boxes/pcs or null",
+  "unit": "kg/bao/thùng/cái or null",
+  "batchNumber": "batch code or null",
   "location": "location name or null",
-  "barcodeData": "detected barcode/QR data or null",
-  "detectedObjects": ["list", "of", "detected", "items"],
+  "detectedObjects": ["list", "of", "objects"],
   "confidence": 0.0-1.0
 }`
 
@@ -239,7 +219,7 @@ Respond with ONLY valid JSON in this exact format:
     ])
 
     const response = await result.response
-    const text = response.text()
+    const text = await response.text()
     const extractedData = JSON.parse(text)
 
     console.log('[Gemini] Extracted data:', extractedData)
@@ -258,43 +238,17 @@ function validateExtractedData(data: any): { valid: boolean; errors: string[]; w
   const errors: string[] = []
   const warnings: string[] = []
 
-  // CRITICAL: Check image relevance first
+  // Check image relevance first
   if (data.isRelevant === false) {
     errors.push(`Image rejected: ${data.rejectionReason || 'Not supply chain related'}`)
-    console.log('[Vision AI] Image rejected as irrelevant:', data.rejectionReason)
-    return {
-      valid: false,
-      errors,
-      warnings: ['This image does not appear to be supply chain related']
-    }
-  }
-
-  // If isRelevant field is missing, check for supply chain indicators
-  if (data.isRelevant === undefined || data.isRelevant === null) {
-    // Auto-detect relevance based on detected objects and context
-    const supplyChainKeywords = ['box', 'package', 'pallet', 'barcode', 'qr', 'warehouse', 'product', 'label', 'shipping']
-    const irrelevantKeywords = ['person', 'face', 'selfie', 'landscape', 'pet', 'animal', 'furniture', 'phone']
-    
-    const hasSupplyChainIndicators = data.detectedObjects?.some((obj: string) => 
-      supplyChainKeywords.some(keyword => obj.toLowerCase().includes(keyword))
-    )
-    
-    const hasIrrelevantIndicators = data.detectedObjects?.some((obj: string) => 
-      irrelevantKeywords.some(keyword => obj.toLowerCase().includes(keyword))
-    )
-    
-    if (hasIrrelevantIndicators || !hasSupplyChainIndicators) {
-      errors.push('Image does not appear to contain supply chain related content')
-      warnings.push('Detected objects: ' + (data.detectedObjects?.join(', ') || 'none'))
-      return {
-        valid: false,
-        errors,
-        warnings
-      }
-    }
+    return { valid: false, errors, warnings }
   }
 
   // Required fields
+  if (!data.description || data.description.length < 20) {
+    errors.push('Description too short or missing')
+  }
+
   if (!data.eventType) {
     errors.push('Event type is required')
   }
@@ -311,15 +265,6 @@ function validateExtractedData(data: any): { valid: boolean; errors: string[]; w
   // Validate quantity and unit together
   if (data.quantity && !data.unit) {
     warnings.push('Quantity specified without unit')
-  }
-
-  // Validate barcode if present
-  if (data.barcodeData) {
-    // Basic GS1 validation
-    const gtinMatch = data.barcodeData.match(/\d{8,14}/)
-    if (!gtinMatch) {
-      warnings.push('Barcode data does not contain valid GTIN format')
-    }
   }
 
   return {
@@ -357,16 +302,6 @@ async function mapToEPCIS(aiData: any, userId: string, userName: string, locatio
       bizStep = 'inspecting'
     }
 
-    // Build EPC from barcode if available
-    let epcList: string[] = []
-    if (aiData.barcodeData) {
-      const gtinMatch = aiData.barcodeData.match(/\d{14}/)
-      if (gtinMatch) {
-        const epc = `urn:epc:id:sgtin:${gtinMatch[0].substring(1, 8)}.${gtinMatch[0].substring(8, 13)}.${Date.now()}`
-        epcList.push(epc)
-      }
-    }
-
     // Build EPCIS document
     const eventId = `urn:uuid:${crypto.randomUUID()}`
     const eventTime = new Date().toISOString()
@@ -384,7 +319,6 @@ async function mapToEPCIS(aiData: any, userId: string, userName: string, locatio
           eventTime,
           eventTimeZoneOffset: '+07:00',
           recordTime: eventTime,
-          epcList: epcList.length > 0 ? epcList : undefined,
           bizStep: `https://ns.gs1.org/voc/Bizstep-${bizStep}`,
           disposition: `https://ns.gs1.org/voc/Disp-${disposition}`,
           bizLocation: locationGLN ? {
@@ -394,9 +328,11 @@ async function mapToEPCIS(aiData: any, userId: string, userName: string, locatio
             productName: aiData.productName,
             quantity: aiData.quantity,
             uom: aiData.unit,
+            batchNumber: aiData.batchNumber,
             recordedBy: userName,
             sourceSystem: 'vision_ai',
-            aiConfidence: aiData.confidence
+            aiConfidence: aiData.confidence,
+            description: aiData.description
           }
         }]
       }
@@ -406,7 +342,7 @@ async function mapToEPCIS(aiData: any, userId: string, userName: string, locatio
       event_type: eventType,
       event_time: eventTime,
       event_timezone: 'Asia/Ho_Chi_Minh',
-      epc_list: epcList.length > 0 ? epcList : null,
+      epc_list: null,
       biz_step: bizStep,
       disposition,
       read_point: null,
@@ -423,8 +359,9 @@ async function mapToEPCIS(aiData: any, userId: string, userName: string, locatio
       }] : null,
       ai_metadata: {
         confidence_score: aiData.confidence,
+        description: aiData.description,
+        batch_number: aiData.batchNumber,
         detected_objects: aiData.detectedObjects,
-        barcode_data: aiData.barcodeData,
         raw_ai_output: aiData
       },
       epcis_document: epcisDocument
