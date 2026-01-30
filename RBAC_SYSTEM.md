@@ -18,7 +18,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
   - Toàn quyền với tất cả chức năng
 
 ### 2. **ADMIN** - Quản trị doanh nghiệp
-- **Mô t���**: Quản trị cấp doanh nghiệp, quản lý hoạt động hàng ngày
+- **Mô tả**: Quản trị cấp doanh nghiệp, quản lý hoạt động hàng ngày
 - **Quyền hạn**:
   - Quản lý người dùng trong tổ chức (không bao gồm system_admin)
   - Xem và xuất báo cáo analytics
@@ -284,7 +284,7 @@ import { RequirePermission, RequireRole } from '@/components/auth/permission-gat
 - [ ] Admin không thể sửa System Admin
 - [ ] Worker chỉ tạo được events, không xóa
 - [ ] Auditor chỉ read, không create/update/delete
-- [ ] RLS policies hoạt đ���ng đúng
+- [ ] RLS policies hoạt động đúng
 - [ ] Middleware redirect đúng routes
 - [ ] Permission gates ẩn/hiện UI đúng
 

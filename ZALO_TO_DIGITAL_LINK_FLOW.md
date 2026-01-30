@@ -145,7 +145,7 @@ INSERT INTO digital_links (
 **Flow truy xuất:**
 
 \`\`\`
-1. Scan QR Code bằng điện thoại
+1. Scan QR Code bằng điện tho���i
    ↓
 2. Mở link: https://gs-1-fsma.vercel.app/dl/Kx7mP2qZ
    ↓
@@ -209,7 +209,7 @@ INSERT INTO digital_links (
 ╠══════════════════════════════════════════╣
 ║  Powered by GS1 EPCIS 2.0 Standard       ║
 ║  This product has been accessed 47 times ║
-╚══════════════════════════════════════════╝
+╚═══════════════════════════════��══════════╝
 \`\`\`
 
 ---

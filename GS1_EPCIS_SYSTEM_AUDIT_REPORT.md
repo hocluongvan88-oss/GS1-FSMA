@@ -201,7 +201,7 @@ CREATE TRIGGER trg_validate_commissioning
 **Trạng thái:** ⚠️ CAO - Thiếu cho FSMA 204 compliance
 
 **Hiện tại:**
-- Có "Cooling" trong seed data nhưng ch��� là process step, KHÔNG phải EPCIS event
+- Có "Cooling" trong seed data nhưng chỉ là process step, KHÔNG phải EPCIS event
 - Cooling chỉ xuất hiện trong `product_recipes.process_steps` (Line 535 của 005-seed-data.sql)
 
 **Vấn đề:**

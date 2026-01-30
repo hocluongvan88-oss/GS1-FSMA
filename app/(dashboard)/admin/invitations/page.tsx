@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,12 +29,20 @@ interface Invitation {
   notes: string | null
 }
 
+interface Location {
+  gln: string
+  name: string
+  type: string
+}
+
+// Get singleton client at module level
+const supabase = createClient()
+
 export default function InvitationsPage() {
   const { toast } = useToast()
   const { t } = useLocale()
-  // Use useMemo to ensure singleton client instance
-  const supabase = useMemo(() => createClient(), [])
   const [invitations, setInvitations] = useState<Invitation[]>([])
+  const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string>('')
@@ -44,12 +52,12 @@ export default function InvitationsPage() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setCurrentUserId(data.user.id)
     })
-  }, [supabase])
+  }, [])
   
   // Form state
   const [formData, setFormData] = useState({
-    organizationGln: '8412345678901',
-    organizationName: 'Nhà máy Chế biến Cà phê XYZ',
+    organizationGln: '',
+    organizationName: '',
     invitedRole: 'farmer',
     maxUses: 10,
     expiresInDays: 30,
@@ -58,7 +66,23 @@ export default function InvitationsPage() {
 
   useEffect(() => {
     fetchInvitations()
+    fetchLocations()
   }, [])
+
+  const fetchLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('locations')
+        .select('gln, name, type')
+        .order('name')
+      
+      if (error) throw error
+      if (data) setLocations(data)
+    } catch (error) {
+      console.error('[v0] Error fetching locations:', error)
+      toast({ title: 'Error', description: 'Failed to load locations', variant: 'destructive' })
+    }
+  }
 
   const fetchInvitations = async () => {
     try {
@@ -76,7 +100,28 @@ export default function InvitationsPage() {
     }
   }
 
+  const handleLocationChange = (gln: string) => {
+    const location = locations.find(loc => loc.gln === gln)
+    if (location) {
+      setFormData({
+        ...formData,
+        organizationGln: gln,
+        organizationName: location.name
+      })
+    }
+  }
+
   const handleCreate = async () => {
+    // Validate required fields
+    if (!formData.organizationGln || !formData.organizationName) {
+      toast({ 
+        title: 'Validation Error', 
+        description: 'Please select an organization', 
+        variant: 'destructive' 
+      })
+      return
+    }
+
     try {
       const response = await fetch('/api/invitations', {
         method: 'POST',
@@ -93,6 +138,16 @@ export default function InvitationsPage() {
         toast({ title: 'Success', description: 'Invitation created successfully!' })
         setShowCreateDialog(false)
         fetchInvitations()
+        
+        // Reset form
+        setFormData({
+          organizationGln: '',
+          organizationName: '',
+          invitedRole: 'farmer',
+          maxUses: 10,
+          expiresInDays: 30,
+          notes: ''
+        })
         
         // Copy code to clipboard
         navigator.clipboard.writeText(result.data.invitation_code)
@@ -173,20 +228,31 @@ export default function InvitationsPage() {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Organization GLN</Label>
-                  <Input
+                  <Label>Organization / Location</Label>
+                  <Select
                     value={formData.organizationGln}
-                    onChange={(e) => setFormData({ ...formData, organizationGln: e.target.value })}
-                    placeholder="8412345678901"
-                  />
-                </div>
-                <div>
-                  <Label>Organization Name</Label>
-                  <Input
-                    value={formData.organizationName}
-                    onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
-                    placeholder="Nhà máy Chế biến Cà phê XYZ"
-                  />
+                    onValueChange={handleLocationChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select organization..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations && locations.length > 0 ? (
+                        locations.map((location) => (
+                          <SelectItem key={location.gln} value={location.gln}>
+                            {location.name} ({location.gln})
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground">
+                          No locations available
+                        </div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Selected: {formData.organizationName || 'None'}
+                  </p>
                 </div>
                 <div>
                   <Label>Role</Label>

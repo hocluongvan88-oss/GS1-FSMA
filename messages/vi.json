@@ -283,7 +283,7 @@
   "editReason": "Lý do chỉnh sửa",
   "editReasonPlaceholder": "VD: Sửa địa chỉ, cập nhật loại địa điểm...",
   "editReasonRequired": "Vui lòng cung cấp lý do cho việc chỉnh sửa này",
-  "editReasonHint": "Bắt buộc cho lưu vết kiểm toán. Giải th��ch tại sao thay đổi này được thực hiện.",
+  "editReasonHint": "Bắt buộc cho lưu vết kiểm toán. Giải thích tại sao thay đổi này được thực hiện.",
   "createSuccess": "Địa điểm đã được tạo thành công",
   "updateSuccess": "Địa điểm đã được cập nhật thành công",
   "deleteSuccess": "Đã xóa địa điểm",
