@@ -17,6 +17,12 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
+// Helper to validate UUID format
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
+
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: CORS_HEADERS })
 }
@@ -43,8 +49,8 @@ export async function POST(request: NextRequest) {
     // Try Gemini AI if available
     if (process.env.GEMINI_API_KEY) {
       try {
-        // Using gemini-1.5-pro for better quota limits
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+        // Using gemini-pro (stable model)
+        const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
         
         const prompt = `Analyze this Vietnamese voice transcript about supply chain/product information and extract data.
 
@@ -247,6 +253,9 @@ async function createEPCISEvent(
     }
   }
 
+  // Generate a valid UUID for test users (user_id column requires UUID type)
+  const validUserId = isValidUUID(userId) ? userId : crypto.randomUUID()
+  
   // Match the actual database schema from 001-create-epcis-schema.sql
   const eventData = {
     event_type: 'ObjectEvent',
@@ -257,8 +266,8 @@ async function createEPCISEvent(
     read_point: locationGLN,
     biz_location: locationGLN,
     epc_list: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
-    user_id: userId,
-    user_name: userName,
+    user_id: validUserId,
+    user_name: userName || 'Test User',
     source_type: 'voice_ai',
     ai_metadata: {
       method: 'voice_transcript',

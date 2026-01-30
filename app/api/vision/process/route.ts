@@ -17,6 +17,12 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
+// Helper to validate UUID format
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
+
 export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: CORS_HEADERS })
 }
@@ -50,8 +56,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500, headers: CORS_HEADERS })
     }
 
-    // Use Gemini Vision with gemini-1.5-pro for better quota limits
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+    // Use Gemini Vision with gemini-pro-vision (stable model for images)
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro-vision' })
     
     // Extract base64 data from data URL
     let imageData: string
@@ -191,6 +197,9 @@ async function createEPCISEvent(
     }
   }
 
+  // Generate a valid UUID for test users (user_id column requires UUID type)
+  const validUserId = isValidUUID(userId) ? userId : crypto.randomUUID()
+  
   // Match the actual database schema from 001-create-epcis-schema.sql
   const eventData = {
     event_type: 'ObjectEvent',
@@ -201,8 +210,8 @@ async function createEPCISEvent(
     read_point: locationGLN,
     biz_location: locationGLN,
     epc_list: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
-    user_id: userId,
-    user_name: userName,
+    user_id: validUserId,
+    user_name: userName || 'Test User',
     source_type: 'vision_ai',  // Valid value per database constraint
     ai_metadata: {
       method: 'gemini_vision',
