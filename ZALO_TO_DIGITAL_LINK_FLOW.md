@@ -20,7 +20,7 @@
                            │ 2. Nhà máy/Admin tạo QR Code
                            │    từ Digital Link page
                            ▼
-                  ┌──────────────────┐
+                  ┌──────────���───────┐
                   │   QR Code được   │
                   │   in ra/gửi cho  │
                   │   nông dân       │
@@ -197,7 +197,7 @@ INSERT INTO digital_links (
 ║  ● ObjectEvent | Packing                 ║
 ║    📅 14/01/2025 09:15                   ║
 ║    📍 Nhà máy chế biến A                 ║
-���    👤 Recorded by: Trần Thị B            ║
+║    👤 Recorded by: Trần Thị B            ║
 ║    🤖 Source: Vision AI                  ║
 ║                                          ║
 ║  ● ObjectEvent | Receiving               ║

@@ -22,7 +22,7 @@ Hệ thống đã xây dựng được **nền tảng truy xuất nguồn gốc 
 
 Hệ thống **THIẾU các Business Steps & Event Types quan trọng** theo yêu cầu FSMA 204 và EUDR:
 
-| V��n đề | Mức độ | Ảnh hưởng |
+| Vấn đề | Mức độ | Ảnh hưởng |
 |--------|--------|-----------|
 | Thiếu Commissioning Event riêng biệt | **NGHIÊM TRỌNG** | Không track được nguồn gốc ban đầu |
 | Thiếu Cooling Event | **CAO** | Vi phạm yêu cầu FSMA 204 cho trái cây tươi |

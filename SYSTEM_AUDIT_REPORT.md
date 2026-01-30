@@ -1,4 +1,4 @@
-# HỆ TH���NG KIỂM TOÁN - GS1 TRACEABILITY PLATFORM
+# HỆ THỐNG KIỂM TOÁN - GS1 TRACEABILITY PLATFORM
 
 **Ngày kiểm toán:** 25/01/2026
 **Phạm vi:** Toàn bộ frontend pages và database integration

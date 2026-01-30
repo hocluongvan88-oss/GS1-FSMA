@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { TraceabilityService } from '@/lib/services/traceability-service'
+import { createClient } from '@supabase/supabase-js'
 import { validateTransformationEvent, type QuantityItem } from '@/lib/utils/mass-balance'
+import { TraceabilityService } from '@/lib/services/traceability'
 
 /**
  * Test endpoint for transformation events
@@ -106,30 +107,86 @@ export async function POST(request: Request) {
 
     console.log('[v0] Mass balance validation:', validation)
 
-    // Create transformation event using test user info
-    const traceabilityService = new TraceabilityService()
-    const event = await traceabilityService.createTransformationEvent({
-      inputEpcList,
-      outputEpcList,
-      inputQuantity,
-      outputQuantity,
-      bizStep: bizStep || 'commissioning',
-      location,
-      userId: testUserId || 'test-user',
-      userName: testUserName || 'Test User',
-      sourceType: 'manual',
-      aiMetadata: {
-        massBalance: {
-          conversionFactor: validation.conversionFactor,
-          valid: validation.valid,
-          anomalies: validation.anomalies,
-          warnings: validation.warnings
-        },
-        isTestData: true
+    // Create Supabase admin client to bypass RLS for test endpoint
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
       }
-    })
+    )
 
-    console.log('[v0] Event created:', event.id)
+    // Create transformation event directly with admin client
+    const eventTime = new Date().toISOString()
+    const eventId = `urn:uuid:${crypto.randomUUID()}`
+
+    const epcisDocument = {
+      '@context': ['https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld'],
+      type: 'EPCISDocument',
+      schemaVersion: '2.0',
+      creationDate: eventTime,
+      epcisBody: {
+        eventList: [
+          {
+            eventID: eventId,
+            type: 'TransformationEvent',
+            eventTime,
+            eventTimeZoneOffset: '+07:00',
+            inputEPCList: inputEpcList,
+            outputEPCList: outputEpcList,
+            inputQuantityList: inputQuantity.map(q => ({
+              epcClass: `urn:epc:class:lgtin:${q.gtin}.batch123`,
+              quantity: q.value,
+              uom: q.uom
+            })),
+            outputQuantityList: outputQuantity.map(q => ({
+              epcClass: `urn:epc:class:lgtin:${q.gtin}.batch456`,
+              quantity: q.value,
+              uom: q.uom
+            })),
+            bizStep: bizStep || 'commissioning',
+            readPoint: { id: `urn:epc:id:sgln:${location}` }
+          }
+        ]
+      }
+    }
+
+    const { data: event, error: insertError } = await supabaseAdmin
+      .from('events')
+      .insert({
+        event_id: eventId,
+        event_type: 'TransformationEvent',
+        event_time: eventTime,
+        biz_step: bizStep || 'commissioning',
+        read_point: location,
+        input_epc_list: inputEpcList,
+        output_epc_list: outputEpcList,
+        input_quantity_list: inputQuantity,
+        output_quantity_list: outputQuantity,
+        epcis_document: epcisDocument,
+        user_id: testUserId || '00000000-0000-0000-0000-000000000001',
+        user_name: testUserName || 'Test User',
+        source_type: 'manual',
+        ai_metadata: {
+          massBalance: {
+            conversionFactor: validation.conversionFactor,
+            valid: validation.valid,
+            anomalies: validation.anomalies,
+            warnings: validation.warnings
+          },
+          isTestData: true
+        }
+      })
+      .select()
+      .single()
+
+    if (insertError) {
+      console.error('[v0] Insert error:', insertError)
+      throw insertError
+    }
 
     return NextResponse.json({
       success: true,

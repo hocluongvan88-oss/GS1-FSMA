@@ -59,7 +59,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
   - Nhập events qua voice, vision, manual
   - Xem batches và products được giao
   - Cập nhật production progress
-  - Chỉ xem dữ liệu liên quan đến công việc của mình
+  - Chỉ xem dữ li���u liên quan đến công việc của mình
 
 ### 7. **FARMER** - Nông dân
 - **Mô tả**: Nhà cung cấp nguyên liệu thô từ nông nghiệp

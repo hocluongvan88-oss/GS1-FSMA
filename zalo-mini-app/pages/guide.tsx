@@ -156,7 +156,7 @@ export default function GuidePage() {
               <ul className="space-y-1 text-sm text-yellow-800">
                 <li>• Luôn kiểm tra thông tin AI trích xuất trước khi lưu</li>
                 <li>• Chụp ảnh rõ nét, tránh mờ hoặc thiếu sáng</li>
-                <li>• Nói rõ ràng khi ghi âm, tránh ồn xung quanh</li>
+                <li>• Nói rõ ràng khi ghi âm, tr��nh ồn xung quanh</li>
                 <li>• Dữ liệu sẽ tự động đồng bộ khi có mạng</li>
               </ul>
             </div>
