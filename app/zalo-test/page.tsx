@@ -38,7 +38,7 @@ export default function ZaloTestPage() {
     }, ...prev])
   }
 
-  // Test Voice Input
+  // Test Voice Input - using Next.js API route
   const testVoiceInput = async () => {
     if (!voiceInput.trim()) {
       alert('Vui lòng nhập transcript để test')
@@ -49,18 +49,17 @@ export default function ZaloTestPage() {
     console.log('[v0] Testing voice input:', voiceInput)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-voice-input`, {
+      // Use Next.js API route instead of Supabase Edge Function
+      const response = await fetch('/api/voice/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
-          audioUrl: 'mock://audio.mp3', // Mock URL for testing
+          mockTranscript: voiceInput,
           userId: 'test-user-123',
           userName: 'Test User',
-          locationGLN: '8412345678901',
-          mockTranscript: voiceInput // For testing without actual audio
+          locationGLN: '8412345678901'
         })
       })
 
@@ -76,12 +75,12 @@ export default function ZaloTestPage() {
       })
 
       if (result.success) {
-        alert(`✅ Thành công! Event ID: ${result.eventId}\nSản phẩm: ${result.extractedData?.productName}`)
+        alert(`Thanh cong! Event ID: ${result.eventId}\nSan pham: ${result.extractedData?.productName}\nMethod: ${result.method}`)
         await fetchRecentEvents()
       } else {
-        alert(`❌ Lỗi: ${result.validation?.errors?.join(', ')}`)
+        alert(`Loi: ${result.validation?.errors?.join(', ') || result.error}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[v0] Voice test error:', error)
       addTestResult({
         type: 'voice',
@@ -89,16 +88,16 @@ export default function ZaloTestPage() {
         success: false,
         error: error.message
       })
-      alert('❌ Lỗi kết nối: ' + error.message)
+      alert('Loi ket noi: ' + error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  // Test Camera/Vision Input
+  // Test Camera/Vision Input - using Next.js API route
   const testVisionInput = async () => {
     if (!imageFile) {
-      alert('Vui lòng chọn ảnh để test')
+      alert('Vui lòng chon anh de test')
       return
     }
 
@@ -106,19 +105,18 @@ export default function ZaloTestPage() {
     console.log('[v0] Testing vision input:', imageFile.name)
 
     try {
-      // Upload image to temporary storage (in real app, use Supabase Storage)
       const reader = new FileReader()
       reader.onloadend = async () => {
         const base64Image = reader.result as string
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-vision-input`, {
+        // Use Next.js API route instead of Supabase Edge Function
+        const response = await fetch('/api/vision/process', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
           },
           body: JSON.stringify({
-            imageUrl: base64Image, // Base64 for testing
+            imageUrl: base64Image,
             userId: 'test-user-123',
             userName: 'Test User',
             locationGLN: '8412345678901'
@@ -137,16 +135,16 @@ export default function ZaloTestPage() {
         })
 
         if (result.success) {
-          alert(`✅ Thành công! Event ID: ${result.eventId}\nSản phẩm: ${result.extractedData?.productName}`)
+          alert(`Thanh cong! Event ID: ${result.eventId}\nSan pham: ${result.extractedData?.productName}\nMethod: ${result.method}`)
           await fetchRecentEvents()
         } else {
-          alert(`❌ Lỗi: ${result.validation?.errors?.join(', ')}`)
+          alert(`Loi: ${result.validation?.errors?.join(', ') || result.error}`)
         }
 
         setLoading(false)
       }
       reader.readAsDataURL(imageFile)
-    } catch (error) {
+    } catch (error: any) {
       console.error('[v0] Vision test error:', error)
       addTestResult({
         type: 'vision',
@@ -154,7 +152,7 @@ export default function ZaloTestPage() {
         success: false,
         error: error.message
       })
-      alert('❌ Lỗi: ' + error.message)
+      alert('Loi: ' + error.message)
       setLoading(false)
     }
   }
