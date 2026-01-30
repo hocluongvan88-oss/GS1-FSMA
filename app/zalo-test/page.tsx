@@ -228,12 +228,25 @@ export default function ZaloTestPage() {
   // Fetch recent events from database
   const fetchRecentEvents = async () => {
     try {
-      const response = await fetch('/api/events?limit=5&userId=test-user-123')
+      console.log('[v0] Fetching recent events from test endpoint...')
+      const response = await fetch('/api/events/test?limit=5')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+      
       const data = await response.json()
-      console.log('[v0] Recent events:', data)
-      setDbEvents(data.events || [])
-    } catch (error) {
+      console.log('[v0] Recent events response:', data)
+      
+      if (data.success) {
+        setDbEvents(data.data || [])
+      } else {
+        console.error('[v0] Error from API:', data.error)
+        alert(`Lỗi load events: ${data.error}\n${data.hint || ''}`)
+      }
+    } catch (error: any) {
       console.error('[v0] Failed to fetch events:', error)
+      alert(`Không thể kết nối API: ${error.message}`)
     }
   }
 
@@ -482,24 +495,29 @@ export default function ZaloTestPage() {
               <p className="text-sm text-gray-500 text-center py-8">Chưa có events trong database</p>
             ) : (
               dbEvents.map((event, index) => (
-                <div key={index} className="p-3 bg-blue-50 rounded-lg text-sm">
+                <div key={event.id || index} className="p-3 bg-blue-50 rounded-lg text-sm">
                   <div className="flex items-center justify-between mb-2">
                     <Badge>{event.event_type}</Badge>
-                    <span className="text-xs text-gray-600">{event.event_id}</span>
+                    <span className="text-xs text-gray-600">{event.id}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-gray-600">Action:</span> {event.action}
+                      <span className="text-gray-600">Action:</span> {event.action || 'N/A'}
                     </div>
                     <div>
-                      <span className="text-gray-600">Source:</span> {event.source_type}
+                      <span className="text-gray-600">Source:</span> {event.source_type || 'N/A'}
                     </div>
                     <div>
-                      <span className="text-gray-600">Time:</span> {new Date(event.event_time).toLocaleString('vi-VN')}
+                      <span className="text-gray-600">Time:</span> {event.event_time ? new Date(event.event_time).toLocaleString('vi-VN') : 'N/A'}
                     </div>
                     <div>
-                      <span className="text-gray-600">Status:</span> {event.validation_status}
+                      <span className="text-gray-600">Products:</span> {event.epc_list?.length || 0} items
                     </div>
+                    {event.quantity_list && (
+                      <div className="col-span-2">
+                        <span className="text-gray-600">Quantity:</span> {JSON.stringify(event.quantity_list)}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))

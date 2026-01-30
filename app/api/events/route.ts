@@ -31,36 +31,47 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit')
     const offset = searchParams.get('offset')
 
-    // Generate cache key from query params
-    const cacheKey = `events:${eventType || 'all'}:${sourceType || 'all'}:${startDate || ''}:${endDate || ''}:${limit || 100}:${offset || 0}`
+    console.log('[v0] Fetching events with params:', {
+      eventType,
+      sourceType,
+      startDate,
+      endDate,
+      limit,
+      offset
+    })
 
-    // Use cache with 2 minute TTL
-    const events = await withCache(
-      cacheKey,
-      async () => {
-        return await eventRepo.findAll({
-          eventType: eventType as any,
-          sourceType: sourceType as any,
-          startDate: startDate || undefined,
-          endDate: endDate || undefined,
-          limit: limit ? Number.parseInt(limit) : 100,
-          offset: offset ? Number.parseInt(offset) : 0
-        })
-      },
-      2 * 60 * 1000 // 2 minutes cache
-    )
+    // Don't use cache for now to avoid issues during testing
+    const events = await eventRepo.findAll({
+      eventType: eventType as any,
+      sourceType: sourceType as any,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      limit: limit ? Number.parseInt(limit) : 100,
+      offset: offset ? Number.parseInt(offset) : 0
+    })
+
+    console.log('[v0] Successfully fetched events:', events?.length || 0)
 
     return NextResponse.json({
       success: true,
-      data: events,
-      count: events.length
+      data: events || [],
+      count: events?.length || 0
     })
   } catch (error: any) {
     console.error('[v0] Error fetching events:', error)
+    console.error('[v0] Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    })
+    
     return NextResponse.json(
       {
         success: false,
-        error: error.message
+        error: error.message || 'Failed to fetch events',
+        details: error.details || null,
+        hint: error.hint || 'Check if you are authenticated and have proper permissions'
       },
       { status: 500 }
     )

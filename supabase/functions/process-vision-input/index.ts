@@ -178,15 +178,36 @@ async function processImageWithGemini(imageUrl: string) {
     const imageBuffer = await imageResponse.arrayBuffer()
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
 
-    const prompt = `Analyze this image from a supply chain/traceability context. Extract:
-1. Event type (receiving, shipping, production, packing, inspection)
-2. Product information (name, quantity, unit)
-3. Any visible barcodes, QR codes, GTIN numbers, batch/lot numbers
-4. Location information if visible
-5. Count of items/packages
+    const prompt = `CRITICAL: First determine if this image is relevant to supply chain/traceability.
+
+REJECT if image contains:
+- Faces, people, selfies
+- Landscapes, scenery, nature
+- Personal items (phones, clothes, furniture)
+- Random objects unrelated to products/packaging
+- Food on plates (not packaged products)
+- Pets, animals
+
+ACCEPT if image shows:
+- Product packages, boxes, bags
+- Barcodes, QR codes, labels
+- Products on shelves, pallets, warehouses
+- Manufacturing/production activities
+- Shipping/receiving areas
+- Agricultural products (raw materials)
+
+Analyze this image and extract:
+1. Is this supply chain relevant? (true/false)
+2. Event type (receiving, shipping, production, packing, inspection)
+3. Product information (name, quantity, unit)
+4. Any visible barcodes, QR codes, GTIN numbers, batch/lot numbers
+5. Location information if visible
+6. Count of items/packages
 
 Respond with ONLY valid JSON in this exact format:
 {
+  "isRelevant": true or false,
+  "rejectionReason": "reason if not relevant, null otherwise",
   "eventType": "ObjectEvent or TransformationEvent",
   "action": "receiving/shipping/production/packing/inspection",
   "productName": "product name or null",
@@ -227,6 +248,42 @@ Respond with ONLY valid JSON in this exact format:
 function validateExtractedData(data: any): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = []
   const warnings: string[] = []
+
+  // CRITICAL: Check image relevance first
+  if (data.isRelevant === false) {
+    errors.push(`Image rejected: ${data.rejectionReason || 'Not supply chain related'}`)
+    console.log('[Vision AI] Image rejected as irrelevant:', data.rejectionReason)
+    return {
+      valid: false,
+      errors,
+      warnings: ['This image does not appear to be supply chain related']
+    }
+  }
+
+  // If isRelevant field is missing, check for supply chain indicators
+  if (data.isRelevant === undefined || data.isRelevant === null) {
+    // Auto-detect relevance based on detected objects and context
+    const supplyChainKeywords = ['box', 'package', 'pallet', 'barcode', 'qr', 'warehouse', 'product', 'label', 'shipping']
+    const irrelevantKeywords = ['person', 'face', 'selfie', 'landscape', 'pet', 'animal', 'furniture', 'phone']
+    
+    const hasSupplyChainIndicators = data.detectedObjects?.some((obj: string) => 
+      supplyChainKeywords.some(keyword => obj.toLowerCase().includes(keyword))
+    )
+    
+    const hasIrrelevantIndicators = data.detectedObjects?.some((obj: string) => 
+      irrelevantKeywords.some(keyword => obj.toLowerCase().includes(keyword))
+    )
+    
+    if (hasIrrelevantIndicators || !hasSupplyChainIndicators) {
+      errors.push('Image does not appear to contain supply chain related content')
+      warnings.push('Detected objects: ' + (data.detectedObjects?.join(', ') || 'none'))
+      return {
+        valid: false,
+        errors,
+        warnings
+      }
+    }
+  }
 
   // Required fields
   if (!data.eventType) {

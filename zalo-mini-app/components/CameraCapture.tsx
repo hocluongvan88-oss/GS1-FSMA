@@ -91,9 +91,17 @@ export function CameraCapture({
     <div className="flex flex-col gap-4 p-4 bg-white rounded-lg shadow">
       <div className="text-center">
         <h3 className="font-semibold text-lg">Chụp ảnh sản phẩm</h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 mb-2">
           Chụp để nhận diện số lượng và mã sản phẩm
         </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-xs text-left">
+          <p className="font-semibold text-blue-900 mb-1">💡 Mẹo chụp ảnh:</p>
+          <ul className="text-blue-800 space-y-1">
+            <li>• Chụp vuông góc với mã vạch</li>
+            <li>• Đủ sáng, tránh bóng che</li>
+            <li>• Giữ điện thoại ổn định</li>
+          </ul>
+        </div>
       </div>
 
       {previewUrl && (
