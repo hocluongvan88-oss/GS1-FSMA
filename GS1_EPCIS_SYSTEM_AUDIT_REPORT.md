@@ -134,7 +134,7 @@ WHERE t.depth < 10
 
 **Hiện tại:**
 - Code có sử dụng `biz_step = 'commissioning'` trong ObjectEvent
-- NHƯNG không có ràng bu��c đảm bảo commissioning event phải là **đầu tiên** trong chuỗi
+- NHƯNG không có ràng buộc đảm bảo commissioning event phải là **đầu tiên** trong chuỗi
 
 **Vấn đề:**
 \`\`\`sql

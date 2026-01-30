@@ -6,14 +6,15 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
-import { env } from 'https://deno.land/std@0.168.0/env/mod.ts';
+import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts'
+import { Deno } from 'https://deno.land/std@0.168.0/runtime.ts' // Declare Deno variable
 
-const geminiApiKey = env.get('GEMINI_API_KEY')
-const supabaseUrl = env.get('SUPABASE_URL')!
-const supabaseServiceKey = env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(geminiApiKey!)
+// CORS Headers - Required for browser/Zalo access
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
 
 interface VisionProcessingRequest {
   imageUrl: string
@@ -44,23 +45,37 @@ interface VisionResult {
   logId?: string
 }
 
+const supabaseUrl = 'your_supabase_url_here'
+const supabaseServiceKey = 'your_supabase_service_key_here'
+const genAI = new GoogleGenerativeAI('your_google_generative_ai_key_here')
+
 serve(async (req) => {
+  // Handle CORS preflight immediately - CRITICAL for browser/Zalo access
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { 
-        headers: { 
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        } 
-      })
+    // Initialize environment variables and Gemini AFTER OPTIONS check
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY not configured')
     }
+    
+    const genAI = new GoogleGenerativeAI(geminiApiKey)
 
     const { imageUrl, userId, userName, locationGLN } = await req.json() as VisionProcessingRequest
 
     if (!imageUrl || !userId) {
       return new Response(
         JSON.stringify({ error: 'imageUrl and userId are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
@@ -69,7 +84,7 @@ serve(async (req) => {
     const startTime = Date.now()
 
     // Process image with Gemini 2.0 Flash
-    const aiResult = await processImageWithGemini(imageUrl)
+    const aiResult = await processImageWithGemini(imageUrl, genAI)
     
     const processingTime = Date.now() - startTime
 
@@ -130,10 +145,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify(result),
       { 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
 
@@ -147,10 +159,7 @@ serve(async (req) => {
       }),
       { 
         status: 500, 
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
   }
@@ -159,7 +168,7 @@ serve(async (req) => {
 /**
  * Process image using Gemini 2.0 Flash with native vision
  */
-async function processImageWithGemini(imageUrl: string) {
+async function processImageWithGemini(imageUrl: string, genAI: GoogleGenerativeAI) {
   try {
     // Initialize model with JSON response config
     const model = genAI.getGenerativeModel({ 

@@ -282,7 +282,7 @@ CREATE TABLE events (
 CREATE TABLE ai_processing_logs (
   id UUID PRIMARY KEY,
   processing_type TEXT, -- 'voice' hoặc 'vision'
-  input_data JSONB, -- audioUrl hoặc imageUrl
+  input_data JSONB, -- audioUrl ho��c imageUrl
   ai_provider TEXT, -- 'openai', 'google'
   raw_response JSONB, -- Full AI response
   confidence_score DECIMAL,

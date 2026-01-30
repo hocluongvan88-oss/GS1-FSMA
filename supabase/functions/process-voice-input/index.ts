@@ -6,11 +6,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
-import { Deno } from 'https://deno.land/std@0.168.0/io/mod.ts'
-
-const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts'
+import { Deno } from 'https://deno.land/std@0.168.0/permissions/mod.ts' // Declare Deno variable
 
 // CORS Headers - Required for browser/Zalo access
 const corsHeaders = {
@@ -19,8 +16,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(geminiApiKey!)
+const supabaseUrl = 'your-supabase-url' // Replace with your Supabase URL
+const supabaseServiceKey = 'your-supabase-service-key' // Replace with your Supabase service key
+const genAI = new GoogleGenerativeAI('your-google-api-key') // Replace with your Google API key
 
 interface VoiceProcessingRequest {
   audioUrl: string
@@ -57,6 +55,16 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize environment variables and Gemini AFTER OPTIONS check
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY not configured')
+    }
+    
+    const genAI = new GoogleGenerativeAI(geminiApiKey)
 
     const { audioUrl, userId, userName, locationGLN } = await req.json() as VoiceProcessingRequest
 
@@ -75,7 +83,7 @@ serve(async (req) => {
     const startTime = Date.now()
 
     // Process audio with Gemini 2.0 Flash
-    const aiResult = await processAudioWithGemini(audioUrl)
+    const aiResult = await processAudioWithGemini(audioUrl, genAI)
     
     const processingTime = Date.now() - startTime
 
@@ -159,7 +167,7 @@ serve(async (req) => {
 /**
  * Process audio using Gemini 2.0 Flash with native audio support
  */
-async function processAudioWithGemini(audioUrl: string) {
+async function processAudioWithGemini(audioUrl: string, genAI: GoogleGenerativeAI) {
   try {
     // Initialize model with JSON response config
     const model = genAI.getGenerativeModel({ 
@@ -207,7 +215,7 @@ Respond with ONLY valid JSON in this exact format:
     ])
 
     const response = await result.response
-    const text = response.text()
+    const text = await response.text()
     const extractedData = JSON.parse(text)
 
     console.log('[Gemini] Extracted data:', extractedData)

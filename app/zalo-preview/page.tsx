@@ -62,7 +62,7 @@ export default function ZaloPreviewPage() {
               </TabsTrigger>
               <TabsTrigger value="batch" className="gap-2">
                 <Package className="w-4 h-4" />
-                Nhi���u SP
+                Nhiều SP
               </TabsTrigger>
             </TabsList>
 

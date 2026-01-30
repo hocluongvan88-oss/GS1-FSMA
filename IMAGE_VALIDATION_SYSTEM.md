@@ -85,7 +85,7 @@ Hệ thống tự động từ chối ảnh không liên quan đến chuỗi cun
 
 #### 6. Khu vực nhận/xuất hàng
 - Bãi tập kết
-- Khu vực loading dock
+- Khu v��c loading dock
 - Sân vận chuyển
 
 **Ví dụ:** Khu vực nhận hàng siêu thị, cảng container
