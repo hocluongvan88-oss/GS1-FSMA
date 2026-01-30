@@ -159,7 +159,7 @@ export default function ZaloTestPage() {
     }
   }
 
-  // Test Batch Input
+  // Test Batch Input - using test endpoint instead of auth-protected transformation
   const testBatchInput = async () => {
     if (batchItems.length === 0) {
       alert('Vui lòng thêm ít nhất 1 sản phẩm')
@@ -170,27 +170,30 @@ export default function ZaloTestPage() {
     console.log('[v0] Testing batch input:', batchItems)
 
     try {
-      const response = await fetch('/api/events/transformation', {
+      // Use test endpoint that bypasses auth for testing purposes
+      const response = await fetch('/api/events/transformation/test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputs: batchItems.map(item => ({
-            productGTIN: '08712345678901',
-            productName: item.productName,
+          // Match the expected API schema
+          inputProducts: batchItems.map(item => ({
+            gtin: '08712345678901',
             quantity: item.quantity,
-            unit: item.unit
+            uom: item.unit
           })),
-          outputs: [{
-            productGTIN: '08712345678902',
-            productName: 'Sản phẩm chế biến',
+          outputProducts: [{
+            gtin: '08712345678902',
             quantity: batchItems.reduce((sum, item) => sum + item.quantity, 0) * 0.8,
-            unit: 'kg'
+            uom: 'KGM' // ISO unit code
           }],
-          userId: 'test-user-123',
-          userName: 'Test User',
-          locationGLN: '8412345678901'
+          location: '8412345678901',
+          bizStep: 'commissioning',
+          productType: 'coffee',
+          // Test user info (used by test endpoint)
+          testUserId: 'test-user-123',
+          testUserName: 'Test User'
         })
       })
 
@@ -206,12 +209,12 @@ export default function ZaloTestPage() {
       })
 
       if (result.success) {
-        alert(`✅ Thành công! Event ID: ${result.eventId}`)
+        alert(`✅ Thành công! Event ID: ${result.event?.id || 'N/A'}`)
         await fetchRecentEvents()
       } else {
         alert(`❌ Lỗi: ${result.error}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[v0] Batch test error:', error)
       addTestResult({
         type: 'batch',
