@@ -6,7 +6,7 @@
 ┌─────────────────┐
 │  Nông dân/      │ 1. Ghi nhận sự kiện bằng 
 │  Công nhân      │    Voice/Camera trong Zalo App
-│  (Zalo App)     │ ──────────────────────────┐
+│  (Zalo App)     │ ──────────────────���───────┐
 └─────────────────┘                            │
                                                ▼
 ┌──────────────────────────────────────────────────────┐
@@ -264,7 +264,7 @@ ORDER BY e.event_time DESC;
 
 ---
 
-## 💡 Lợi ích của Flow này
+## ��� Lợi ích của Flow này
 
 1. **Traceability hoàn chỉnh:** Từ nông trại → nhà máy → người tiêu dùng
 2. **Zero manual data entry:** Dùng AI để tự động trích xuất

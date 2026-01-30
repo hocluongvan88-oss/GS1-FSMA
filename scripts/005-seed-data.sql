@@ -161,7 +161,7 @@ INSERT INTO partners (partner_type, company_name, gln, contact_person, email, ph
    '{"city": "Hồ Chí Minh", "district": "Quận 7"}'::jsonb, 'BL-2018-004', 'active', TRUE, 4.6,
    '{"warehouse_locations": 5, "delivery_fleet": 50, "coverage": "nationwide"}'::jsonb),
   
-  ('retailer', 'Siêu thị Co.opMart', '8504444444444', 'Hoàng Văn E', 'purchasing@coopmart.vn', '+84912345005',
+  ('retailer', 'Si��u thị Co.opMart', '8504444444444', 'Hoàng Văn E', 'purchasing@coopmart.vn', '+84912345005',
    '{"city": "Hồ Chí Minh"}'::jsonb, 'BL-2005-005', 'active', TRUE, 4.9,
    '{"total_stores": 100, "customer_base": 2000000, "store_format": "supermarket"}'::jsonb)
 ON CONFLICT DO NOTHING;

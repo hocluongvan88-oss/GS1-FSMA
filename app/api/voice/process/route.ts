@@ -180,11 +180,16 @@ async function createEPCISEvent(
   userName: string,
   locationGLN: string
 ) {
-  const eventId = `urn:uuid:${crypto.randomUUID()}`
   const now = new Date().toISOString()
 
+  // Build quantity list with correct structure
+  const quantityList = [{
+    epc_class: `urn:epc:class:lgtin:${locationGLN}.${data.productName.replace(/\s/g, '_')}`,
+    quantity: data.quantity,
+    uom: data.unit.toUpperCase()
+  }]
+
   const eventData = {
-    id: eventId,
     event_type: 'ObjectEvent',
     action: data.action === 'ship' ? 'DELETE' : 'ADD',
     biz_step: data.action === 'receive' ? 'receiving' : data.action === 'ship' ? 'shipping' : 'commissioning',
@@ -194,21 +199,20 @@ async function createEPCISEvent(
     read_point: locationGLN,
     biz_location: locationGLN,
     epc_list: [`urn:epc:id:sgtin:${locationGLN}.${Date.now()}`],
-    quantity_list: [{
-      epc_class: `urn:epc:class:lgtin:${locationGLN}.${data.productName.replace(/\s/g, '_')}`,
-      quantity: data.quantity,
-      uom: data.unit.toUpperCase()
-    }],
-    source_type: 'voice_input',
-    created_by: userId,
+    quantity_list: quantityList, // Correctly populated quantity_list
+    source_type: 'voice_ai',
+    user_id: userId,
     user_name: userName,
-    raw_input: JSON.stringify(data)
+    ai_metadata: {
+      rawInput: data,
+      method: 'voice_processing'
+    }
   }
 
-  console.log('[v0] Voice process API: Creating event:', eventId)
+  console.log('[v0] Voice process API: Creating event with quantity:', quantityList)
 
   const { data: result, error } = await supabase
-    .from('epcis_events')
+    .from('events') // Correct table name is 'events', not 'epcis_events'
     .insert(eventData)
     .select()
     .single()
@@ -217,6 +221,8 @@ async function createEPCISEvent(
     console.error('[v0] Voice process API: DB error:', error)
     throw new Error(`Database error: ${error.message}`)
   }
+
+  console.log('[v0] Voice process API: Event created successfully:', result.id)
 
   return result
 }

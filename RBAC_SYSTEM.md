@@ -172,7 +172,7 @@ Hệ thống traceability đã được tích hợp đầy đủ hệ thống ph
 
 ### Protected Routes:
 - `/admin/*` - Chỉ system_admin và admin
-- `/analytics` - Tất cả authenticated users
+- `/analytics` - T���t cả authenticated users
 - `/audit` - system_admin, admin, auditor
 - `/ai-review` - system_admin, admin, factory_manager, quality_inspector
 

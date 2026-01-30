@@ -78,6 +78,9 @@ CREATE TABLE IF NOT EXISTS events (
   -- How: Source System (Voice AI, Vision AI, Manual)
   source_type TEXT CHECK (source_type IN ('voice_ai', 'vision_ai', 'manual', 'system')),
   
+  -- Quantity for ObjectEvent/AggregationEvent
+  quantity_list JSONB DEFAULT '[]'::jsonb, -- [{epc_class: string, quantity: number, uom: string}]
+  
   -- Input/Output for TransformationEvent
   input_epc_list JSONB, -- Nguyên liệu đầu vào
   output_epc_list JSONB, -- Sản phẩm đầu ra

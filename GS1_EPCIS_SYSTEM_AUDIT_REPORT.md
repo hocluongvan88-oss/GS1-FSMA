@@ -140,7 +140,7 @@ WHERE t.depth < 10
 \`\`\`sql
 -- ❌ KHÔNG có constraint đảm bảo commissioning event không có parent
 -- ❌ KHÔNG có trigger kiểm tra commissioning event phải là gốc
--- ❌ AI Voice có thể tạo ObjectEvent mà không có commissioning event trước đó
+-- ❌ AI Voice có thể tạo ObjectEvent mà không có commissioning event trư���c đó
 \`\`\`
 
 **Yêu cầu GS1:**
@@ -409,7 +409,7 @@ $$ LANGUAGE plpgsql;
 
 ### 2.4. ⚠️ THIẾU: Shipping vs. Receiving (2-Party Verification)
 
-**Trạng thái:** ⚠️ TRUNG BÌNH - Thiếu xác minh 2 bên
+**Trạng thái:** ⚠️ TRUNG B��NH - Thiếu xác minh 2 bên
 
 **Hiện tại:**
 - Có TransactionEvent với `biz_step = 'shipping'`
