@@ -540,7 +540,7 @@ export default function ShipmentsPage() {
                         <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                         <div className="min-w-0">
                           <div className="font-medium truncate">{getLocationName(shipment.from_location_id)}</div>
-                          <div className="text-xs text-muted-foreground">→</div>
+                          <div className="text-xs text-muted-foreground">���</div>
                           <div className="font-medium truncate">{getLocationName(shipment.to_location_id)}</div>
                         </div>
                       </div>

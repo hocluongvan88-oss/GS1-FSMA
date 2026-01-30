@@ -1877,8 +1877,8 @@ packages:
     resolution: {integrity: sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA==}
     engines: {node: '>=20.0.0'}
 
-  icu-minify@4.8.0:
-    resolution: {integrity: sha512-CY90QvJwc5ghNW+2gepxz4RWogCnM0ynHEFWSDTfGmE4ZPCPDQfkU36AntjbLcwv1Js2AofIGkxNq/LVVpCCbQ==}
+  icu-minify@4.8.1:
+    resolution: {integrity: sha512-RhXrTA19/PUt5/xs3B/eyx3DCjnMmcfdgqNYBE5vdrEqM4PQK2GWjHa1zdArTxPGgEc4jfuDMH1LkKhmIxwLFw==}
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
@@ -2048,8 +2048,8 @@ packages:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
 
-  next-intl-swc-plugin-extractor@4.8.0:
-    resolution: {integrity: sha512-+uooJAaUUnctq/IZrKJrpoA8yB6/z5kDeraySZlT1+XaoU1i+Onaimo2y/vwlqSKPHVRdqx3aqhwRZPuh71LAw==}
+  next-intl-swc-plugin-extractor@4.8.1:
+    resolution: {integrity: sha512-4RXyce0ZrQl/6lkfwvDpP8r5B7wbAQakCW9BuMPh+7/DgXFyE+cBXxcmfDkxFDkpXvBFqBZ2HsN4pav49reAZQ==}
 
   next-intl@4.7.0:
     resolution: {integrity: sha512-gvROzcNr/HM0jTzQlKWQxUNk8jrZ0bREz+bht3wNbv+uzlZ5Kn3J+m+viosub18QJ72S08UJnVK50PXWcUvwpQ==}
@@ -2418,8 +2418,8 @@ packages:
       '@types/react':
         optional: true
 
-  use-intl@4.8.0:
-    resolution: {integrity: sha512-IH56txyiaW26QQzneQf/0PWTa1Os3BMZvwbyDiS8cBjl6mm8dlhlKsgSU6TiSZjV6ZhMv763584jNBEyQV8vtQ==}
+  use-intl@4.8.1:
+    resolution: {integrity: sha512-wH85ro36JAw9NrtogpEsqHghD21Ul6/zAKxTqHktnO6WTQzqhbcfPkO5iXu3YOnJBA8Anm7IvWSTqSzRE+2PsA==}
     peerDependencies:
       react: ^17.0.0 || ^18.0.0 || >=19.0.0-rc <19.0.0 || ^19.0.0
 
@@ -4126,7 +4126,7 @@ snapshots:
 
   iceberg-js@0.8.1: {}
 
-  icu-minify@4.8.0:
+  icu-minify@4.8.1:
     dependencies:
       '@formatjs/icu-messageformat-parser': 3.5.0
 
@@ -4261,7 +4261,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next-intl-swc-plugin-extractor@4.8.0: {}
+  next-intl-swc-plugin-extractor@4.8.1: {}
 
   next-intl@4.7.0(next@16.0.10(@babel/core@7.28.6)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3):
     dependencies:
@@ -4270,10 +4270,10 @@ snapshots:
       '@swc/core': 1.15.11
       negotiator: 1.0.0
       next: 16.0.10(@babel/core@7.28.6)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      next-intl-swc-plugin-extractor: 4.8.0
+      next-intl-swc-plugin-extractor: 4.8.1
       po-parser: 2.1.1
       react: 19.2.4
-      use-intl: 4.8.0(react@19.2.4)
+      use-intl: 4.8.1(react@19.2.4)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -4613,11 +4613,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.10
 
-  use-intl@4.8.0(react@19.2.4):
+  use-intl@4.8.1(react@19.2.4):
     dependencies:
       '@formatjs/fast-memoize': 3.1.0
       '@schummar/icu-type-parser': 1.21.5
-      icu-minify: 4.8.0
+      icu-minify: 4.8.1
       intl-messageformat: 11.1.1
       react: 19.2.4
 

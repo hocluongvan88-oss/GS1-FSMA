@@ -2,7 +2,7 @@
 
 ## 📱 Tổng quan Flow
 
-```
+\`\`\`
 ┌─────────────────┐
 │  Nông dân/      │ 1. Ghi nhận sự kiện bằng 
 │  Công nhân      │    Voice/Camera trong Zalo App
@@ -11,7 +11,7 @@
                                                ▼
 ┌──────────────────────────────────────────────────────┐
 │  SUPABASE DATABASE                                   │
-│  ┌────────────┐    ┌──────────────┐                 │
+│  ┌────────────┐    ┌���─────────────┐                 │
 │  │  events    │───→│  digital_links│                │
 │  │  table     │    │  table        │                │
 │  └────────────┘    └──────────────┘                 │
@@ -35,7 +35,7 @@
                   │  bộ lịch sử sự   │
                   │  kiện truy xuất  │
                   └──────────────────┘
-```
+\`\`\`
 
 ## 🔄 Chi tiết từng bước
 
@@ -49,7 +49,7 @@
 - Tab "Nhiều SP": Nhập batch nhiều sản phẩm cùng lúc
 
 **Xử lý:**
-```typescript
+\`\`\`typescript
 // 1. Zalo App gọi Supabase Edge Function
 POST /functions/v1/process-voice-input
 POST /functions/v1/process-vision-input
@@ -75,7 +75,7 @@ INSERT INTO events (
   user_id,         -- ID của nông dân/công nhân
   user_name        -- Tên người ghi nhận
 )
-```
+\`\`\`
 
 **Kết quả:** Event được lưu vào database với đầy đủ EPCIS schema
 
@@ -89,7 +89,7 @@ INSERT INTO events (
 
 **Quy trình tạo QR:**
 
-```typescript
+\`\`\`typescript
 // 1. Chọn sản phẩm và batch
 Selected Product: Cà phê Arabica (GTIN: 08123456789012)
 Selected Batch: LOT-2024-001
@@ -126,7 +126,7 @@ INSERT INTO digital_links (
   metadata,      -- Link type, product info
   access_count   -- 0 (will increment on each scan)
 )
-```
+\`\`\`
 
 **Kết quả:** 
 - QR Code image được tạo
@@ -144,7 +144,7 @@ INSERT INTO digital_links (
 
 **Flow truy xuất:**
 
-```
+\`\`\`
 1. Scan QR Code bằng điện thoại
    ↓
 2. Mở link: https://gs-1-fsma.vercel.app/dl/Kx7mP2qZ
@@ -167,11 +167,11 @@ INSERT INTO digital_links (
    
    ↓
 4. Hiển thị Public Landing Page với:
-```
+\`\`\`
 
 **Landing Page hiển thị:**
 
-```
+\`\`\`
 ╔══════════════════════════════════════════╗
 ║  PRODUCT TRACEABILITY                    ║
 ╠══════════════════════════════════════════╣
@@ -210,7 +210,7 @@ INSERT INTO digital_links (
 ║  Powered by GS1 EPCIS 2.0 Standard       ║
 ║  This product has been accessed 47 times ║
 ╚══════════════════════════════════════════╝
-```
+\`\`\`
 
 ---
 
@@ -218,7 +218,7 @@ INSERT INTO digital_links (
 
 ### Từ Zalo Event → Digital Link → Consumer View
 
-```sql
+\`\`\`sql
 -- 1. Events từ Zalo được lưu với EPC
 events {
   id: uuid
@@ -247,7 +247,7 @@ FROM events e
 LEFT JOIN locations l ON e.read_point = l.gln
 WHERE e.epc_list @> ARRAY['urn:epc:id:sgtin:812345.678901.12345']
 ORDER BY e.event_time DESC;
-```
+\`\`\`
 
 ---
 
@@ -278,23 +278,23 @@ ORDER BY e.event_time DESC;
 
 ### API Endpoints
 
-```
+\`\`\`
 POST /functions/v1/process-voice-input    → Xử lý giọng nói
 POST /functions/v1/process-vision-input   → Xử lý hình ảnh
 POST /api/generate-qr                     → Tạo QR code
 GET  /dl/{shortCode}                      → Public landing page
 GET  /api/dl/{shortCode}                  → API lấy traceability data
-```
+\`\`\`
 
 ### Key Tables
 
-```
+\`\`\`
 events          → Lưu tất cả EPCIS events
 digital_links   → Mapping short URL → product/batch
 products        → Master data sản phẩm (GTIN)
 batches         → Lô sản xuất
 locations       → Địa điểm (GLN)
-```
+\`\`\`
 
 ### Tech Stack
 

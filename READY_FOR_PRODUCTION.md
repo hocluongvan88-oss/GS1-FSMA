@@ -129,7 +129,7 @@ Hệ thống **Zalo Mini App Traceability** đã được xây dựng hoàn ch�
 
 ## 📁 File Structure Overview
 
-```
+\`\`\`
 ├── app/
 │   ├── api/
 │   │   ├── auth/zalo-exchange/          # JWT token exchange
@@ -167,7 +167,7 @@ Hệ thống **Zalo Mini App Traceability** đã được xây dựng hoàn ch�
     │   └── offline-queue.ts            # Offline queue
     └── pages/
         └── index.tsx                   # Main app
-```
+\`\`\`
 
 ---
 
@@ -196,26 +196,26 @@ Hệ thống **Zalo Mini App Traceability** đã được xây dựng hoàn ch�
 ## 🔑 Environment Variables Required
 
 ### Main App (.env.local)
-```bash
+\`\`\`bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
 SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
 GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyxxx...
-```
+\`\`\`
 
 ### Zalo Mini App
-```bash
+\`\`\`bash
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
 ZALO_APP_ID=xxx
 ZALO_APP_SECRET=xxx
 JWT_SECRET=your-secure-random-string
-```
+\`\`\`
 
 ### Supabase Edge Functions
-```bash
+\`\`\`bash
 GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyxxx...
-```
+\`\`\`
 
 ---
 
@@ -276,25 +276,25 @@ GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyxxx...
 ## 🚀 Deployment Steps
 
 ### 1. Database Setup (30 minutes)
-```bash
+\`\`\`bash
 # Run all migrations in Supabase SQL Editor
 scripts/001-create-epcis-schema.sql
 # ... through ...
 scripts/020-iot-devices-system.sql
-```
+\`\`\`
 
 ### 2. Edge Functions Deployment (15 minutes)
-```bash
+\`\`\`bash
 supabase functions deploy process-vision-input
 supabase functions deploy process-voice-input
 supabase secrets set GOOGLE_GENERATIVE_AI_API_KEY=xxx
-```
+\`\`\`
 
 ### 3. Main App Deployment (10 minutes)
-```bash
+\`\`\`bash
 # Deploy to Vercel
 vercel --prod
-```
+\`\`\`
 
 ### 4. Zalo Mini App Setup (1-2 hours)
 1. Register app at developers.zalo.me

@@ -39,7 +39,7 @@ Hệ thống tự động từ chối ảnh không liên quan đến chuỗi cun
 **Lý do:** Không có thông tin truy xuất
 
 #### 5. Thú cưng, động vật
-- Chó, mèo, thú cưng
+- Chó, m��o, thú cưng
 - Động vật không liên quan sản xuất
 
 **Lý do:** Không phải đối tượng truy xuất
@@ -95,25 +95,25 @@ Hệ thống tự động từ chối ảnh không liên quan đến chuỗi cun
 ## Cơ chế Hoạt động
 
 ### Bước 1: Gemini Vision Analysis
-```typescript
+\`\`\`typescript
 {
   "isRelevant": true/false,
   "rejectionReason": "Reason if rejected",
   "confidence": 0.0-1.0
 }
-```
+\`\`\`
 
 ### Bước 2: Validation Logic
 
 #### Primary Check - isRelevant flag
-```typescript
+\`\`\`typescript
 if (data.isRelevant === false) {
   return {
     valid: false,
     errors: [`Image rejected: ${data.rejectionReason}`]
   }
 }
-```
+\`\`\`
 
 #### Fallback Check - Keyword Detection
 Nếu Gemini không trả về `isRelevant`:
@@ -129,11 +129,11 @@ Nếu Gemini không trả về `isRelevant`:
 - phone, personal
 
 ### Bước 3: Confidence Threshold
-```typescript
+\`\`\`typescript
 if (data.confidence < 0.6) {
   warnings.push('Low confidence - manual review needed')
 }
-```
+\`\`\`
 
 ---
 
@@ -142,27 +142,27 @@ if (data.confidence < 0.6) {
 ### Trong Zalo Mini App
 
 #### ❌ Ảnh bị từ chối:
-```
+\`\`\`
 "Ảnh không hợp lệ"
 "Vui lòng chụp ảnh sản phẩm, bao bì, 
 hoặc hoạt động supply chain"
 
 Lý do: [rejection reason]
-```
+\`\`\`
 
 #### ⚠️ Confidence thấp:
-```
+\`\`\`
 "AI không chắc chắn về ảnh này"
 "Bạn có muốn tiếp tục không?"
 
 [Tiếp tục] [Chụp lại]
-```
+\`\`\`
 
 #### ✅ Ảnh được chấp nhận:
-```
+\`\`\`
 "Đang xử lý ảnh..."
 "Đã phát hiện: [detected objects]"
-```
+\`\`\`
 
 ---
 
@@ -218,7 +218,7 @@ Lý do: [rejection reason]
    - Includes: Gemini API + validation
 
 ### Database Logging
-```sql
+\`\`\`sql
 -- ai_processing_logs table
 SELECT 
   processing_type,
@@ -229,7 +229,7 @@ FROM ai_processing_logs
 WHERE processing_type = 'vision'
   AND status = 'failed'
   AND error_message LIKE '%rejected%'
-```
+\`\`\`
 
 ---
 

@@ -7,20 +7,20 @@
 #### 1.1 Supabase Production Database
 - [ ] Create production Supabase project
 - [ ] Run all SQL migrations in order (001 → 020)
-  ```bash
+  \`\`\`bash
   # Execute in Supabase SQL Editor
   scripts/001-create-epcis-schema.sql
   scripts/002-enhance-master-data.sql
   # ... continue with all scripts
   scripts/020-iot-devices-system.sql
-  ```
+  \`\`\`
 - [ ] Verify all tables created correctly
 - [ ] Enable Row Level Security (RLS) on all tables
 - [ ] Create production service role key
 - [ ] Set up database backups (daily)
 
 #### 1.2 Environment Variables
-```bash
+\`\`\`bash
 # Main App (.env.local)
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
@@ -33,21 +33,21 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
 ZALO_APP_ID=xxx
 ZALO_APP_SECRET=xxx
 JWT_SECRET=your-secure-random-string-here
-```
+\`\`\`
 
 #### 1.3 Supabase Edge Functions
 - [ ] Deploy `process-vision-input` function
-  ```bash
+  \`\`\`bash
   supabase functions deploy process-vision-input
-  ```
+  \`\`\`
 - [ ] Deploy `process-voice-input` function
-  ```bash
+  \`\`\`bash
   supabase functions deploy process-voice-input
-  ```
+  \`\`\`
 - [ ] Set function secrets
-  ```bash
+  \`\`\`bash
   supabase secrets set GOOGLE_GENERATIVE_AI_API_KEY=AIzaSyxxx...
-  ```
+  \`\`\`
 - [ ] Test functions with sample data
 - [ ] Monitor function logs for errors
 
@@ -63,27 +63,27 @@ JWT_SECRET=your-secure-random-string-here
 
 #### 2.2 App Configuration
 - [ ] Update `zalo-mini-app/app-config.json`
-  ```json
+  \`\`\`json
   {
     "app": {
       "appId": "YOUR_ZALO_APP_ID",
       "appName": "Traceability System"
     }
   }
-  ```
+  \`\`\`
 - [ ] Configure permissions (camera, microphone, location)
 - [ ] Set up testing environment
 - [ ] Add test users for internal testing
 
 #### 2.3 Build & Package
-```bash
+\`\`\`bash
 cd zalo-mini-app
 npm install
 npm run build
 
 # Package for Zalo
 zip -r traceability-app.zip dist/
-```
+\`\`\`
 - [ ] Upload to Zalo Developer Console
 - [ ] Submit for Zalo review
 - [ ] Wait for approval (3-7 days)
@@ -94,11 +94,11 @@ zip -r traceability-app.zip dist/
 
 #### 3.1 Master Data
 - [ ] Import products (CSV/Excel)
-  ```sql
+  \`\`\`sql
   COPY products(gtin, name, description, category)
   FROM '/path/to/products.csv'
   WITH (FORMAT csv, HEADER true);
-  ```
+  \`\`\`
 - [ ] Import locations with GLN codes
 - [ ] Import business partners
 - [ ] Import user accounts with roles
@@ -130,9 +130,9 @@ zip -r traceability-app.zip dist/
 #### 4.2 API Security
 - [ ] Enable CORS for allowed origins only
 - [ ] Add rate limiting (180 req/min per IP)
-  ```typescript
+  \`\`\`typescript
   // Already implemented in lib/rate-limit.ts
-  ```
+  \`\`\`
 - [ ] Implement API key validation
 - [ ] Add request logging for audit trail
 - [ ] Enable HTTPS only (no HTTP)
@@ -164,9 +164,9 @@ zip -r traceability-app.zip dist/
 
 #### 5.3 Frontend Optimization
 - [ ] Enable Next.js production build
-  ```bash
+  \`\`\`bash
   npm run build
-  ```
+  \`\`\`
 - [ ] Configure CDN for static assets
 - [ ] Enable image optimization
 - [ ] Add service worker for offline mode
@@ -214,11 +214,11 @@ zip -r traceability-app.zip dist/
 - [ ] Test traceability queries (forward/backward)
 
 #### 7.2 Load Testing
-```bash
+\`\`\`bash
 # Run load tests
 cd scripts
 node load-test-suite.js
-```
+\`\`\`
 - [ ] Test 100 concurrent users
 - [ ] Test 1000 events per hour
 - [ ] Verify response times <500ms
@@ -273,9 +273,9 @@ node load-test-suite.js
 #### 9.2 Final Deployment
 - [ ] Schedule maintenance window
 - [ ] Deploy main app to Vercel
-  ```bash
+  \`\`\`bash
   vercel --prod
-  ```
+  \`\`\`
 - [ ] Submit Zalo Mini App for production
 - [ ] Update DNS records
 - [ ] Enable monitoring alerts
@@ -354,22 +354,22 @@ node load-test-suite.js
 If critical issues occur post-deployment:
 
 1. **Database Rollback**
-   ```sql
+   \`\`\`sql
    -- Restore from backup
    pg_restore -d production backup_YYYYMMDD.dump
-   ```
+   \`\`\`
 
 2. **Application Rollback**
-   ```bash
+   \`\`\`bash
    # Revert to previous Vercel deployment
    vercel rollback
-   ```
+   \`\`\`
 
 3. **Edge Functions Rollback**
-   ```bash
+   \`\`\`bash
    # Redeploy previous version
    supabase functions deploy process-vision-input --version v1.0.0
-   ```
+   \`\`\`
 
 ---
 

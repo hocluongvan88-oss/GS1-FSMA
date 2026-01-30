@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500, headers: CORS_HEADERS })
     }
 
-    // Use Gemini Vision with gemini-1.5-pro for better quota limits
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+    // Use Gemini Vision with gemini-1.5-flash (supported by v1beta API)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     
     // Extract base64 data from data URL
     let imageData: string

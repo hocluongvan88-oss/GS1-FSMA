@@ -30,6 +30,9 @@ export default function ZaloTestPage() {
 
   // Database verification
   const [dbEvents, setDbEvents] = useState<any[]>([])
+  
+  // Generate a valid UUID for testing
+  const testUserId = '00000000-0000-0000-0000-000000000001'
 
   const addTestResult = (result: any) => {
     setTestResults(prev => [{
@@ -57,7 +60,7 @@ export default function ZaloTestPage() {
         },
         body: JSON.stringify({
           mockTranscript: voiceInput,
-          userId: 'test-user-123',
+          userId: testUserId,
           userName: 'Test User',
           locationGLN: '8412345678901'
         })
@@ -117,7 +120,7 @@ export default function ZaloTestPage() {
           },
           body: JSON.stringify({
             imageUrl: base64Image,
-            userId: 'test-user-123',
+            userId: testUserId,
             userName: 'Test User',
             locationGLN: '8412345678901'
           })
@@ -190,7 +193,7 @@ export default function ZaloTestPage() {
           bizStep: 'commissioning',
           productType: 'coffee',
           // Test user info (used by test endpoint)
-          testUserId: 'test-user-123',
+          testUserId: testUserId,
           testUserName: 'Test User'
         })
       })

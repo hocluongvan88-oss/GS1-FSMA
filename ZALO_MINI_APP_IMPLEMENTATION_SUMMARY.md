@@ -15,11 +15,11 @@
 - **Secure token storage** in localStorage
 
 ### Files created/modified:
-```
+\`\`\`
 /zalo-mini-app/utils/jwt-auth.ts          [NEW] - JWT auth utilities
 /app/api/auth/zalo-exchange/route.ts      [NEW] - Token exchange API
 /zalo-mini-app/pages/index.tsx            [MODIFIED] - Updated to use JWT auth
-```
+\`\`\`
 
 ### How it works:
 1. Zalo Mini App gets Zalo access token via `api.getAccessToken()`
@@ -48,10 +48,10 @@
 - **EPCIS conversion** utilities
 
 ### Files created:
-```
+\`\`\`
 /lib/utils/gs1-parser.ts                  [NEW] - Full GS1 parser
 /lib/utils/gs1-validation.ts              [EXISTS] - GS1 validation utilities
-```
+\`\`\`
 
 ### Supported GS1 Application Identifiers:
 | AI | Description | Format | Example |
@@ -66,7 +66,7 @@
 | 414 | Location GLN | N13 | 414 8541234567890 |
 
 ### Functions:
-```typescript
+\`\`\`typescript
 // Parse barcode string
 parseGS1Barcode(barcode: string): GS1ParseResult
 
@@ -80,7 +80,7 @@ buildEPCURI(gs1Data: Record<string, string>): string
 parseAndValidateGS1(barcode: string): {
   valid, parsed, epcis, errors, warnings
 }
-```
+\`\`\`
 
 ### Integration points:
 - Vision AI: Extracts barcodes from images → parses with GS1 parser
@@ -100,19 +100,19 @@ parseAndValidateGS1(barcode: string): {
 - **Location GLN mapping**
 
 ### Files created:
-```
+\`\`\`
 /lib/utils/epcis-mapper.ts                [NEW] - Complete EPCIS mapping
 /supabase/functions/process-vision-input/index.ts   [UPDATED] - Integrated mapping
 /supabase/functions/process-voice-input/index.ts    [UPDATED] - Integrated mapping
-```
+\`\`\`
 
 ### Mapping pipeline:
-```
+\`\`\`
 AI Output → Validation → EPCIS Input → EPCIS Document → Database Event
-```
+\`\`\`
 
 ### Example mapping:
-```typescript
+\`\`\`typescript
 // AI extracted data
 {
   action: "receiving",
@@ -131,7 +131,7 @@ AI Output → Validation → EPCIS Input → EPCIS Document → Database Event
   output_quantity: [{ value: 50, uom: "kg" }],
   epcis_document: { /* Full GS1 EPCIS 2.0 JSON-LD */ }
 }
-```
+\`\`\`
 
 ### Fields properly mapped:
 - ✅ `event_type` - Determined from action keywords
@@ -158,16 +158,16 @@ AI Output → Validation → EPCIS Input → EPCIS Document → Database Event
 - **Error and warning system**
 
 ### Files modified:
-```
+\`\`\`
 /supabase/functions/process-vision-input/index.ts   [UPDATED] - Added validation
 /supabase/functions/process-voice-input/index.ts    [UPDATED] - Added validation
 /lib/validators/epcis-validator.ts                  [EXISTS] - Full validator
-```
+\`\`\`
 
 ### Validation layers:
 
 #### 1. AI Output Validation
-```typescript
+\`\`\`typescript
 function validateExtractedData(data: any): ValidationResult {
   // Check required fields
   if (!data.eventType) errors.push('Event type required')
@@ -181,10 +181,10 @@ function validateExtractedData(data: any): ValidationResult {
   
   return { valid: errors.length === 0, errors, warnings }
 }
-```
+\`\`\`
 
 #### 2. GS1 Validation
-```typescript
+\`\`\`typescript
 // Validate GTIN check digit
 validateGTIN(gtin: string): { valid, error? }
 
@@ -193,26 +193,26 @@ validateGLN(gln: string): { valid, error? }
 
 // Validate barcode format
 parseGS1Barcode(barcode: string): { valid, errors }
-```
+\`\`\`
 
 #### 3. EPCIS Validation
-```typescript
+\`\`\`typescript
 // From epcis-validator.ts
 - Schema validation (required fields, types)
 - GS1 identifier validation
 - Business rules (mass balance, dates)
 - Data consistency checks
-```
+\`\`\`
 
 ### Validation flow:
-```
+\`\`\`
 1. AI processes input → extracts data
 2. validateExtractedData() → checks AI output
 3. If valid → mapToEPCIS()
 4. If still valid → Save to database
 5. If invalid → Return errors to user
 6. Log all processing to ai_processing_logs
-```
+\`\`\`
 
 ### Error handling:
 - **Critical errors**: Block save, return to user
@@ -242,7 +242,7 @@ parseGS1Barcode(barcode: string): { valid, errors }
 | Vietnamese support | Good | Excellent |
 
 ### Updated functions:
-```typescript
+\`\`\`typescript
 // Vision processing with Gemini
 async function processImageWithGemini(imageUrl: string) {
   // Converts image to base64
@@ -256,10 +256,10 @@ async function processAudioWithGemini(audioUrl: string) {
   // Single API call to Gemini 2.0 Flash
   // Returns: { transcription, productName, quantity, unit, confidence }
 }
-```
+\`\`\`
 
 ### Prompt engineering:
-```typescript
+\`\`\`typescript
 text: `Analyze this image from supply chain context. Extract:
 1. Event type (receiving, shipping, production, packing, inspection)
 2. Product information (name, quantity, unit)
@@ -278,7 +278,7 @@ Respond with ONLY valid JSON:
   "detectedObjects": ["list", "of", "items"],
   "confidence": 0.0-1.0
 }`
-```
+\`\`\`
 
 ---
 
@@ -310,7 +310,7 @@ Respond with ONLY valid JSON:
 
 ## Integration Architecture
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────┐
 │                     Zalo Mini App (Client)                  │
 │  ┌──────────────┐  ┌──────────────┐                        │
@@ -327,7 +327,7 @@ Respond with ONLY valid JSON:
           ▼                  ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Supabase Edge Functions                        │
-│  ┌────────────────────┐  ┌────────────────────┐            │
+│  ┌────────────────────┐  ┌��───────────────────┐            │
 │  │ process-voice-input│  │ process-vision-input│           │
 │  │                    │  │                     │            │
 │  │ 1. Fetch audio     │  │ 1. Fetch image      │            │
@@ -367,7 +367,7 @@ Respond with ONLY valid JSON:
 │  │   events │  │   ID     │  │                 │            │
 │  └──────────┘  └──────────┘  └────────────────┘            │
 └─────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -415,7 +415,7 @@ Respond with ONLY valid JSON:
 
 ## Environment Variables Required
 
-```bash
+\`\`\`bash
 # Zalo Mini App
 NEXT_PUBLIC_API_URL=https://your-domain.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -425,7 +425,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 GEMINI_API_KEY=your-gemini-api-key
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
+\`\`\`
 
 ---
 

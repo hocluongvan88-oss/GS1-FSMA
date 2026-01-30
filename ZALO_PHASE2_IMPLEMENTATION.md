@@ -17,12 +17,12 @@
 - Xem trước danh sách trước khi submit
 
 **Cách sử dụng:**
-```tsx
+\`\`\`tsx
 <BatchInput
   onSubmit={handleBatchSubmit}
   accessToken={session.accessToken}
 />
-```
+\`\`\`
 
 **Mapping với database:**
 - Mỗi item tạo 1 event riêng trong bảng `events`
@@ -42,13 +42,13 @@
 - Hiển thị số lượng events đang chờ
 
 **Cách hoạt động:**
-```typescript
+\`\`\`typescript
 // Add to queue when offline
 offlineQueue.addToQueue('voice', eventData);
 
 // Auto sync when back online
 await offlineQueue.syncQueue(accessToken, supabaseUrl);
-```
+\`\`\`
 
 **Storage:**
 - Key: `zalo_offline_queue`
@@ -66,11 +66,11 @@ await offlineQueue.syncQueue(accessToken, supabaseUrl);
 - Fallback to null nếu không có location
 
 **Mapping:**
-```typescript
+\`\`\`typescript
 const eventData = {
   locationGLN: user?.assigned_location || null
 }
-```
+\`\`\`
 
 **Database field:** `events.read_point` (GLN format)
 
@@ -86,12 +86,12 @@ const eventData = {
 - Loading state indicator
 
 **API:**
-```typescript
+\`\`\`typescript
 GET /rest/v1/products?or=(name.ilike.*{query}*,gtin.ilike.*{query}*)&limit=5
-```
+\`\`\`
 
 **Response format:**
-```typescript
+\`\`\`typescript
 interface Product {
   id: string;
   gtin: string;
@@ -99,7 +99,7 @@ interface Product {
   category: string;
   unit: string;
 }
-```
+\`\`\`
 
 ---
 
@@ -114,9 +114,9 @@ interface Product {
 - Badge cho event type và biz step
 
 **API:**
-```typescript
+\`\`\`typescript
 GET /rest/v1/events?created_by=eq.{userId}&order=event_time.desc&limit=10
-```
+\`\`\`
 
 **UI Elements:**
 - Event type badge
@@ -130,7 +130,7 @@ GET /rest/v1/events?created_by=eq.{userId}&order=event_time.desc&limit=10
 ## 🔄 Integration Flow
 
 ### Main Page Flow
-```
+\`\`\`
 1. User opens app
    ↓
 2. Initialize auth + check session
@@ -151,10 +151,10 @@ GET /rest/v1/events?created_by=eq.{userId}&order=event_time.desc&limit=10
    If offline → Add to queue
    ↓
 10. Update UI + Recent events list
-```
+\`\`\`
 
 ### Offline Queue Sync
-```
+\`\`\`
 window.addEventListener('online') triggers
    ↓
 syncOfflineQueue() called
@@ -166,14 +166,14 @@ For each queued event:
    - If retry > 3 → Remove permanently
    ↓
 Update queue size display
-```
+\`\`\`
 
 ---
 
 ## 📊 Database Mapping
 
 ### Events Table
-```sql
+\`\`\`sql
 events (
   id,
   event_type,        -- From AI extraction
@@ -189,10 +189,10 @@ events (
                      --   manualData (for batch)
                      -- }
 )
-```
+\`\`\`
 
 ### Products Table
-```sql
+\`\`\`sql
 products (
   id,
   gtin,              -- For autocomplete search
@@ -201,13 +201,13 @@ products (
   unit,              -- For quantity input
   metadata JSONB
 )
-```
+\`\`\`
 
 ---
 
 ## 🎨 UI Components Structure
 
-```
+\`\`\`
 index.tsx (Main Page)
 ├── User Info Header
 │   ├── Avatar
@@ -227,7 +227,7 @@ index.tsx (Main Page)
 │
 └── Recent Events
     └── RecentEvents Component
-```
+\`\`\`
 
 ---
 
@@ -348,7 +348,7 @@ index.tsx (Main Page)
 ## 📚 Files Modified/Created
 
 ### New Files
-```
+\`\`\`
 zalo-mini-app/
 ├── utils/
 │   └── offline-queue.ts          [NEW]
@@ -356,10 +356,10 @@ zalo-mini-app/
     ├── BatchInput.tsx             [NEW]
     ├── ProductAutocomplete.tsx    [NEW]
     └── RecentEvents.tsx           [NEW]
-```
+\`\`\`
 
 ### Modified Files
-```
+\`\`\`
 zalo-mini-app/
 └── pages/
     └── index.tsx                  [MODIFIED]
@@ -367,7 +367,7 @@ zalo-mini-app/
         - Added batch tab
         - Added recent events
         - Added queue sync logic
-```
+\`\`\`
 
 ---
 

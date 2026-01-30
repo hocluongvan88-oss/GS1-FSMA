@@ -10,7 +10,7 @@
 ## 1. TỔNG QUAN HỆ THỐNG
 
 ### 1.1. Cấu trúc dự án
-```
+\`\`\`
 zalo-mini-app/
 ├── components/
 │   ├── CameraCapture.tsx      ✅ Đã triển khai
@@ -21,7 +21,7 @@ zalo-mini-app/
 │   └── zalo-auth.ts           ✅ Đã triển khai
 ├── app-config.json            ✅ Đã cấu hình
 └── package.json               ✅ Dependencies đầy đủ
-```
+\`\`\`
 
 ### 1.2. Tính năng chính
 - ✅ **Authentication với Zalo:** Đã tích hợp OAuth2
@@ -41,7 +41,7 @@ zalo-mini-app/
 **Trạng thái:** Đã triển khai cơ bản, cần cải thiện
 
 **Implementation hiện tại:**
-```typescript
+\`\`\`typescript
 // zalo-auth.ts
 export async function authenticateWithZalo() {
   // 1. Zalo OAuth
@@ -59,7 +59,7 @@ export async function authenticateWithZalo() {
     await supabase.from('users').insert({...})
   }
 }
-```
+\`\`\`
 
 **Vấn đề:**
 1. ❌ **Không sử dụng JWT từ Zalo:** Hiện tại dùng anonymous auth, không bảo mật
@@ -68,14 +68,14 @@ export async function authenticateWithZalo() {
 4. ❌ **Password hardcoded:** Sử dụng `zalo_id` làm password
 
 **Khuyến nghị:**
-```typescript
+\`\`\`typescript
 // Nên sử dụng Custom JWT Auth với Supabase
 const { data: authData } = await supabase.auth.signInWithIdToken({
   provider: 'zalo',
   token: zaloAccessToken,
   nonce: 'optional-nonce'
 })
-```
+\`\`\`
 
 ---
 
@@ -108,7 +108,7 @@ const { data: authData } = await supabase.auth.signInWithIdToken({
 
 **Khuyến nghị cải thiện:**
 
-```typescript
+\`\`\`typescript
 // Prompt cần chi tiết hơn
 const systemPrompt = `
 Extract structured data from Vietnamese farmer voice input:
@@ -148,7 +148,7 @@ Return JSON:
   "confidence": 0.92
 }
 `
-```
+\`\`\`
 
 ---
 
@@ -180,7 +180,7 @@ Return JSON:
 
 **Khuyến nghị:**
 
-```typescript
+\`\`\`typescript
 // Thêm GS1 parser library
 import { parseGS1Barcode } from 'gs1-parser'
 
@@ -200,14 +200,14 @@ async function processOCR(imageUrl: string) {
     confidence: 0.9
   }
 }
-```
+\`\`\`
 
 ---
 
 ### 2.4. Database Schema Mapping ⚠️
 
 **Events Table Schema:**
-```sql
+\`\`\`sql
 CREATE TABLE events (
   id UUID PRIMARY KEY,
   
@@ -237,11 +237,11 @@ CREATE TABLE events (
   -- EPCIS Document
   epcis_document JSONB -- ⚠️ Không đầy đủ theo chuẩn EPCIS 2.0
 )
-```
+\`\`\`
 
 **Dữ liệu Zalo App tạo ra:**
 
-```json
+\`\`\`json
 // ❌ Thiếu nhiều field bắt buộc
 {
   "event_type": "ObjectEvent",
@@ -264,7 +264,7 @@ CREATE TABLE events (
     }
   }
 }
-```
+\`\`\`
 
 **Khuyến nghị:**
 1. Thêm validation layer trước khi insert
@@ -278,7 +278,7 @@ CREATE TABLE events (
 
 **Trạng thái:** Đã triển khai đúng
 
-```sql
+\`\`\`sql
 CREATE TABLE ai_processing_logs (
   id UUID PRIMARY KEY,
   processing_type TEXT, -- 'voice' hoặc 'vision'
@@ -290,7 +290,7 @@ CREATE TABLE ai_processing_logs (
   status TEXT,
   created_at TIMESTAMPTZ
 )
-```
+\`\`\`
 
 ✅ Đầy đủ cho audit trail  
 ✅ Có confidence score để review  
@@ -309,7 +309,7 @@ CREATE TABLE ai_processing_logs (
 - Sync khi có internet (queue system)
 - Service Worker cho caching
 
-```typescript
+\`\`\`typescript
 // Thêm offline queue
 import { openDB } from 'idb'
 
@@ -339,14 +339,14 @@ window.addEventListener('online', async () => {
     await db.delete('pending-events', event.id)
   }
 })
-```
+\`\`\`
 
 ### 3.2. Real-time Updates ❌
 
 **Vấn đề:** Không có live updates khi có event mới
 
 **Khuyến nghị:**
-```typescript
+\`\`\`typescript
 // Sử dụng Supabase Realtime
 const subscription = supabase
   .channel('events-channel')
@@ -358,7 +358,7 @@ const subscription = supabase
     }
   )
   .subscribe()
-```
+\`\`\`
 
 ### 3.3. Batch Operations ❌
 
@@ -374,7 +374,7 @@ const subscription = supabase
 **Vấn đề:** Không có validation AI output
 
 **Khuyến nghị:**
-```typescript
+\`\`\`typescript
 // Thêm validation trước khi submit
 function validateEvent(eventData: any): ValidationResult {
   const errors: string[] = []
@@ -399,14 +399,14 @@ function validateEvent(eventData: any): ValidationResult {
     confidence: calculateConfidence(eventData)
   }
 }
-```
+\`\`\`
 
 ### 3.5. Recent Events List ❌
 
 **Vấn đề:** Hiện tại chỉ có placeholder "Chưa có hoạt động"
 
 **Khuyến nghị:**
-```typescript
+\`\`\`typescript
 const [recentEvents, setRecentEvents] = useState([])
 
 useEffect(() => {
@@ -423,7 +423,7 @@ async function loadRecentEvents() {
   
   setRecentEvents(data || [])
 }
-```
+\`\`\`
 
 ---
 
@@ -442,7 +442,7 @@ async function loadRecentEvents() {
 **Các phương án khác:**
 
 #### Option 1: Gemini Pro 2.0 Flash (Khuyến nghị ⭐)
-```typescript
+\`\`\`typescript
 // Gemini hỗ trợ audio trực tiếp, không cần Whisper
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" })
 
@@ -455,7 +455,7 @@ const result = await model.generateContent([
   },
   { text: "Trích xuất thông tin truy xuất nguồn gốc từ đoạn ghi âm này..." }
 ])
-```
+\`\`\`
 
 **Ưu điểm:**
 - ✅ End-to-end audio processing (không cần Whisper)
@@ -470,7 +470,7 @@ const result = await model.generateContent([
 - Gemini: $0.075/1M tokens (sau free tier)
 
 #### Option 2: Groq + Llama 3.3 70B
-```typescript
+\`\`\`typescript
 // Sử dụng Groq inference (siêu nhanh)
 const transcription = await groq.audio.transcriptions.create({
   file: audioFile,
@@ -484,7 +484,7 @@ const parsed = await groq.chat.completions.create({
     { role: "user", content: transcription.text }
   ]
 })
-```
+\`\`\`
 
 **Ưu điểm:**
 - ✅ **SIÊU NHANH:** 750+ tokens/s (fastest inference)
@@ -509,7 +509,7 @@ const parsed = await groq.chat.completions.create({
 **Các phương án khác:**
 
 #### Option 1: Gemini 2.0 Flash + Native Multimodal (Khuyến nghị ⭐⭐)
-```typescript
+\`\`\`typescript
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" })
 
 const result = await model.generateContent([
@@ -529,7 +529,7 @@ const result = await model.generateContent([
     Return JSON with GS1 format.`
   }
 ])
-```
+\`\`\`
 
 **Ưu điểm:**
 - ✅ All-in-one: OCR + Counting + Parsing
@@ -539,7 +539,7 @@ const result = await model.generateContent([
 - ✅ Quality inspection included
 
 #### Option 2: GPT-4o + GS1 Parser Library
-```typescript
+\`\`\`typescript
 // Kết hợp GPT-4o với gs1-parser
 import { parseGS1 } from '@aidc-toolkit/gs1'
 
@@ -555,7 +555,7 @@ const vision = await openai.chat.completions.create({
 })
 
 const gs1Data = parseGS1(vision.choices[0].message.content)
-```
+\`\`\`
 
 **Ưu điểm:**
 - ✅ Accurate GS1 parsing
@@ -575,22 +575,22 @@ const gs1Data = parseGS1(vision.choices[0].message.content)
 ### 5.1. Tech Stack Đề Xuất ⭐
 
 **Voice AI:**
-```
+\`\`\`
 Gemini 2.0 Flash (audio native)
 ├─ STT + NLP trong 1 call
 ├─ Cost: Free tier → $0.075/1M
 ├─ Latency: 1-2s
 └─ Accuracy: 95%+
-```
+\`\`\`
 
 **Vision AI:**
-```
+\`\`\`
 Gemini 2.0 Flash (vision + GS1 parsing)
 ├─ OCR + Object Detection + Quality Check
 ├─ Cost: Free tier → $0.075/1M
 ├─ Latency: 1-2s
 └─ GS1 native support
-```
+\`\`\`
 
 **Fallback cho production:**
 - High priority: GPT-4o
@@ -626,7 +626,7 @@ Gemini 2.0 Flash (vision + GS1 parsing)
 ### 5.3. Code Examples
 
 #### Gemini Implementation
-```typescript
+\`\`\`typescript
 // zalo-mini-app/utils/gemini-ai.ts
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
@@ -723,10 +723,10 @@ Return JSON:
   
   return JSON.parse(result.response.text())
 }
-```
+\`\`\`
 
 #### Complete Event Creation
-```typescript
+\`\`\`typescript
 // zalo-mini-app/utils/event-creation.ts
 import { supabase } from './zalo-auth'
 
@@ -836,14 +836,14 @@ function validateEventData(data: any) {
     confidence: data.confidence || 0.5
   }
 }
-```
+\`\`\`
 
 ---
 
 ## 6. COST ESTIMATION
 
 ### Current Stack (OpenAI + Google)
-```
+\`\`\`
 Voice: 1000 recordings/day
 - Whisper: 1000 × $0.006 = $6/day
 - GPT-4o Mini: 1000 × 500 tokens × $0.15/1M = $0.075/day
@@ -855,10 +855,10 @@ Vision: 500 images/day
 Total Vision: $2/day = $60/month
 
 TOTAL: $242/month
-```
+\`\`\`
 
 ### Recommended Stack (Gemini)
-```
+\`\`\`
 Voice + Vision: 1500 requests/day
 
 Free Tier: 1500/day = FREE
@@ -867,7 +867,7 @@ After free tier: 1500 × $0.075/1M tokens = $0.1125/day
 TOTAL: $3.40/month (after free tier exhausted)
 
 SAVINGS: $238/month (98% cheaper!)
-```
+\`\`\`
 
 ---
 

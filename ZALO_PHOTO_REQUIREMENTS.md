@@ -13,11 +13,11 @@
 - ✅ Khoảng cách: 15-30cm từ camera đến sản phẩm
 
 **Ví dụ tốt:**
-```
+\`\`\`
 📦 [Bao gạo] → Mã vạch rõ ràng
 🏷️ [Thùng hàng] → QR code sắc nét
 📋 [Nhãn sản phẩm] → Số lot/batch hiển thị
-```
+\`\`\`
 
 **Tránh:**
 - ❌ Mã vạch bị nhòe, mờ
@@ -149,7 +149,7 @@ Chụp:
 ## Ví Dụ Thực Tế
 
 ### **Case 1: Nông Dân Nhận Giống**
-```
+\`\`\`
 📸 Chụp:
 - Bao giống (có mã vạch)
 - Số lượng bao (đếm 10 bao)
@@ -166,10 +166,10 @@ Chụp:
   "detectedObjects": ["rice bags", "truck"],
   "confidence": 0.92
 }
-```
+\`\`\`
 
 ### **Case 2: Nhà Máy Sản Xuất**
-```
+\`\`\`
 📸 Chụp:
 - Dây chuyền xay xát
 - Gạo thành phẩm đang đóng bao
@@ -186,10 +186,10 @@ Chụp:
   "detectedObjects": ["rice milling machine", "white rice", "scale"],
   "confidence": 0.88
 }
-```
+\`\`\`
 
 ### **Case 3: Xuất Hàng cho Nhà Phân Phối**
-```
+\`\`\`
 📸 Chụp:
 - Pallet chứa 50 thùng gạo
 - QR code trên mỗi thùng
@@ -206,7 +206,7 @@ Chụp:
   "detectedObjects": ["pallet", "cardboard boxes", "truck"],
   "confidence": 0.95
 }
-```
+\`\`\`
 
 ---
 
@@ -216,7 +216,7 @@ Chụp:
 - **≥ 0.9** → Excellent (tự động chấp nhận)
 - **0.7 - 0.89** → Good (cần review nhanh)
 - **0.6 - 0.69** → Fair (cần xem lại kỹ)
-- **< 0.6** → Poor (cần chụp lại hoặc nhập thủ công)
+- **< 0.6** → Poor (cần chụp l���i hoặc nhập thủ công)
 
 ### **Khi Nào AI Yêu Cầu Xác Nhận:**
 - Confidence < 0.6
