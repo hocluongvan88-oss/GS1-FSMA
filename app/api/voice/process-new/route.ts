@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
     // Try Gemini AI if available
     if (process.env.GEMINI_API_KEY) {
       try {
-        // Using updated model gemini-2.0-flash
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+        // Using gemini-1.5-pro for better quota limits
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
         
         const prompt = `Analyze this Vietnamese voice transcript about supply chain/product information and extract data.
 
