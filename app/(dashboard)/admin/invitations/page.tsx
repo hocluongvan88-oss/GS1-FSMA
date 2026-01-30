@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Ticket, Plus, Copy, XCircle, Clock, Users } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { RequirePermission } from '@/components/auth/permission-gate'
 import { useLocale } from '@/lib/locale-context'
 
@@ -34,9 +34,6 @@ interface Location {
   name: string
   type: string
 }
-
-// Get singleton client at module level
-const supabase = createClient()
 
 export default function InvitationsPage() {
   const { toast } = useToast()

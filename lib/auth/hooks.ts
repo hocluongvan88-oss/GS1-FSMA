@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import type { UserRole, Permission } from './permissions'
 import { hasPermission, hasAnyPermission, hasAllPermissions } from './permissions'
 
@@ -15,9 +15,6 @@ export interface User {
   assigned_location?: string
   metadata?: Record<string, unknown>
 }
-
-// Get singleton client at module level to ensure single instance
-const supabase = createClient()
 
 /**
  * Hook to get current user and role

@@ -34,7 +34,7 @@ zalo-mini-app/
 
 ---
 
-## 2. PHÂN TÍCH CHI TIẾT
+## 2. PH��N TÍCH CHI TIẾT
 
 ### 2.1. Authentication Flow ✅
 
@@ -64,7 +64,7 @@ export async function authenticateWithZalo() {
 **Vấn đề:**
 1. ❌ **Không sử dụng JWT từ Zalo:** Hiện tại dùng anonymous auth, không bảo mật
 2. ❌ **Session management thiếu:** Không có refresh token logic
-3. ⚠️ **Email fake:** D��ng `${zalo_id}@zalo.local` không chuẩn
+3. ⚠️ **Email fake:** Dùng `${zalo_id}@zalo.local` không chuẩn
 4. ❌ **Password hardcoded:** Sử dụng `zalo_id` làm password
 
 **Khuyến nghị:**

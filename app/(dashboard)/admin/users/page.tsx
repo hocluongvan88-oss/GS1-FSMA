@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { PermissionGate } from '@/components/auth/permission-gate'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,9 @@ import { Label } from '@/components/ui/label'
 import { Users, Search, Shield, Edit } from 'lucide-react'
 import { roleNames, roleDescriptions, type UserRole } from '@/lib/auth/permissions'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client' // Declare the createClient variable
+
+const client = createClient(); // Declare the client variable
 
 interface User {
   id: string
@@ -26,9 +29,6 @@ interface User {
   metadata: Record<string, unknown>
 }
 
-// Get singleton client at module level
-const supabase = createClient()
-
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,7 +40,7 @@ export default function UserManagementPage() {
   const fetchUsers = useCallback(async () => {
     try {
       // Query directly from users table - email is stored there
-      const { data: userProfiles, error } = await supabase
+      const { data: userProfiles, error } = await client
         .from('users')
         .select('*')
         .order('created_at', { ascending: false })
@@ -75,7 +75,7 @@ export default function UserManagementPage() {
 
   const handleUpdateRole = async (userId: string, newRole: UserRole) => {
     try {
-      const { error } = await supabase
+      const { error } = await client
         .from('users')
         .update({ role: newRole })
         .eq('id', userId)

@@ -1041,7 +1041,7 @@
   },
   "nationalPortal": {
     "title": "Cổng cư Truy vết Quốc gia",
-    "subtitle": "Đồng bộ dữ liệu với cổng truy xuất nguồn gốc quốc gia",
+    "subtitle": "Đồng bộ dữ liệu v���i cổng truy xuất nguồn gốc quốc gia",
     "connectionStatus": "Trạng thái kết nối",
     "connected": "Đã kết nối",
     "lastSync": "Đồng bộ lần cuối",
