@@ -1,0 +1,23 @@
+{
+  "app": {
+    "appName": "Truy xuất nguồn gốc",
+    "appId": "YOUR_ZALO_APP_ID",
+    "version": "1.0.0",
+    "statusBarColor": "#10b981",
+    "headerColor": "#10b981",
+    "headerTextColor": "white",
+    "hideAndroidBottomNavigationBar": true,
+    "hideIOSBottomNavigationBar": true
+  },
+  "navigateBarColor": "#ffffff",
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black"
+  },
+  "permission": {
+    "scope.userInfo": "Lấy thông tin người dùng",
+    "scope.userPhonenumber": "Lấy số điện thoại",
+    "scope.camera": "Truy cập camera để chụp ảnh sản phẩm",
+    "scope.record": "Ghi âm giọng nói để nhập liệu"
+  }
+}
