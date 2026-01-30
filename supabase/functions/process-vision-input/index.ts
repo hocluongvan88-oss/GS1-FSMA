@@ -5,11 +5,15 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-import { env } from 'https://deno.land/std@0.168.0/node/process.ts' // Declaring Deno.env
+import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
+import { env } from 'https://deno.land/std@0.168.0/env/mod.ts';
 
 const geminiApiKey = env.get('GEMINI_API_KEY')
 const supabaseUrl = env.get('SUPABASE_URL')!
 const supabaseServiceKey = env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(geminiApiKey!)
 
 interface VisionProcessingRequest {
   imageUrl: string
@@ -157,21 +161,24 @@ serve(async (req) => {
  */
 async function processImageWithGemini(imageUrl: string) {
   try {
+    // Initialize model with JSON response config
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash-exp",
+      generationConfig: {
+        temperature: 0.1,
+        topK: 1,
+        topP: 0.8,
+        maxOutputTokens: 1024,
+        responseMimeType: "application/json"
+      }
+    })
+
     // Fetch image and convert to base64
     const imageResponse = await fetch(imageUrl)
     const imageBuffer = await imageResponse.arrayBuffer()
     const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)))
-    
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `Analyze this image from a supply chain/traceability context. Extract:
+
+    const prompt = `Analyze this image from a supply chain/traceability context. Extract:
 1. Event type (receiving, shipping, production, packing, inspection)
 2. Product information (name, quantity, unit)
 3. Any visible barcodes, QR codes, GTIN numbers, batch/lot numbers
@@ -190,39 +197,24 @@ Respond with ONLY valid JSON in this exact format:
   "detectedObjects": ["list", "of", "detected", "items"],
   "confidence": 0.0-1.0
 }`
-              },
-              {
-                inline_data: {
-                  mime_type: 'image/jpeg',
-                  data: base64Image
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            topK: 1,
-            topP: 0.8,
-            maxOutputTokens: 1024,
-            responseMimeType: 'application/json'
-          }
-        })
+
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: 'image/jpeg',
+          data: base64Image
+        }
       }
-    )
+    ])
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('[Gemini] API error:', error)
-      throw new Error('Gemini API failed')
-    }
+    const response = await result.response
+    const text = response.text()
+    const extractedData = JSON.parse(text)
 
-    const data = await response.json()
-    const resultText = data.candidates[0].content.parts[0].text
-    const result = JSON.parse(resultText)
+    console.log('[Gemini] Extracted data:', extractedData)
 
-    console.log('[Gemini] Extracted data:', result)
-
-    return result
+    return extractedData
   } catch (error) {
     console.error('[Gemini] Processing error:', error)
     throw error

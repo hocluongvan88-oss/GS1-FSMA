@@ -5,13 +5,15 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
-import { env } from 'https://deno.land/std@0.168.0/dotenv/mod.ts'
-
-await env.load({ export: true })
+import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
+import { Deno } from 'https://deno.land/std@0.168.0/io/mod.ts'
 
 const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(geminiApiKey!)
 
 interface VoiceProcessingRequest {
   audioUrl: string
@@ -158,21 +160,24 @@ serve(async (req) => {
  */
 async function processAudioWithGemini(audioUrl: string) {
   try {
+    // Initialize model with JSON response config
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash-exp",
+      generationConfig: {
+        temperature: 0.1,
+        topK: 1,
+        topP: 0.8,
+        maxOutputTokens: 1024,
+        responseMimeType: "application/json"
+      }
+    })
+
     // Fetch audio and convert to base64
     const audioResponse = await fetch(audioUrl)
     const audioBuffer = await audioResponse.arrayBuffer()
     const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
-    
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `Transcribe this Vietnamese audio and extract supply chain event information. Extract:
+
+    const prompt = `Transcribe this Vietnamese audio and extract supply chain event information. Extract:
 1. Full transcription (in Vietnamese)
 2. Event type (nhận hàng/receiving, xuất hàng/shipping, sản xuất/production, đóng gói/packing, kiểm tra/inspection)
 3. Product information (tên sản phẩm, số lượng, đơn vị)
@@ -189,39 +194,24 @@ Respond with ONLY valid JSON in this exact format:
   "location": "location name or null",
   "confidence": 0.0-1.0
 }`
-              },
-              {
-                inline_data: {
-                  mime_type: 'audio/mp3',
-                  data: base64Audio
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            topK: 1,
-            topP: 0.8,
-            maxOutputTokens: 1024,
-            responseMimeType: 'application/json'
-          }
-        })
+
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: 'audio/mp3',
+          data: base64Audio
+        }
       }
-    )
+    ])
 
-    if (!response.ok) {
-      const error = await response.text()
-      console.error('[Gemini] API error:', error)
-      throw new Error('Gemini API failed')
-    }
+    const response = await result.response
+    const text = response.text()
+    const extractedData = JSON.parse(text)
 
-    const data = await response.json()
-    const resultText = data.candidates[0].content.parts[0].text
-    const result = JSON.parse(resultText)
+    console.log('[Gemini] Extracted data:', extractedData)
 
-    console.log('[Gemini] Extracted data:', result)
-
-    return result
+    return extractedData
   } catch (error) {
     console.error('[Gemini] Processing error:', error)
     throw error
