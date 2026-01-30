@@ -210,6 +210,7 @@ async function createEPCISEvent(
   }
 
   console.log('[v0] Voice process API: Creating event with quantity:', quantityList)
+  console.log('[v0] Voice process API: Full eventData:', JSON.stringify(eventData, null, 2))
 
   const { data: result, error } = await supabase
     .from('events') // Correct table name is 'events', not 'epcis_events'
@@ -223,6 +224,7 @@ async function createEPCISEvent(
   }
 
   console.log('[v0] Voice process API: Event created successfully:', result.id)
+  console.log('[v0] Voice process API: Result quantity_list:', result.quantity_list)
 
   return result
 }
