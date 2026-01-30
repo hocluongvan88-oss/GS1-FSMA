@@ -6,7 +6,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
-import { Deno } from 'https://deno.land/std@0.168.0/io/mod.ts'; // Declaring Deno variable
+// Note: Deno is a global object in Deno runtime, no import needed
 
 // CORS Headers - Required for browser/Zalo access
 const corsHeaders = {
