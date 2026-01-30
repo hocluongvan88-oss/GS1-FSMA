@@ -117,7 +117,7 @@ Hệ thống **Zalo Mini App Traceability** đã được xây dựng hoàn ch�
 - Support GTIN/Batch/EPC queries
 - Location tracking
 
-### 5. Analytics Dashboard ��
+### 5. Analytics Dashboard ✓
 - **Component**: `zalo-mini-app/components/AnalyticsDashboard.tsx`
 - Event statistics (total, today, transformation)
 - Mass balance violations counter

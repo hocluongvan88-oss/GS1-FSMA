@@ -154,7 +154,7 @@ CREATE TRIGGER audit_shipments_changes
   FOR EACH ROW
   EXECUTE FUNCTION create_audit_log();
 
--- 5. UPDATE VERIFY FUNCTIONS (với type casting)
+-- 5. UPDATE VERIFY FUNCTIONS (v���i type casting)
 
 DROP FUNCTION IF EXISTS verify_audit_chain();
 CREATE OR REPLACE FUNCTION verify_audit_chain()

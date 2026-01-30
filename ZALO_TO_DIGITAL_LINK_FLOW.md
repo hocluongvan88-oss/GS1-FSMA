@@ -20,7 +20,7 @@
                            │ 2. Nhà máy/Admin tạo QR Code
                            │    từ Digital Link page
                            ▼
-                  ┌──────────���───────┐
+                  ┌──────────────────┐
                   │   QR Code được   │
                   │   in ra/gửi cho  │
                   │   nông dân       │
