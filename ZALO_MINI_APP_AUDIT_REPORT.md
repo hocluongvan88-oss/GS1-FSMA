@@ -38,7 +38,7 @@ zalo-mini-app/
 
 ### 2.1. Authentication Flow ✅
 
-**Trạng thái:** Đã triển khai cơ bản, cần cải thiện
+**Trạng thái:** Đ�� triển khai cơ bản, cần cải thiện
 
 **Implementation hiện tại:**
 \`\`\`typescript

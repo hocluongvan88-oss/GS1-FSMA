@@ -16,8 +16,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (but keep .env.example files)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -25,3 +26,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Supabase
+.supabase
+supabase/.temp/
+
+# Zalo Mini App
+my-app/www/
+my-app/node_modules/

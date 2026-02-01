@@ -1,0 +1,16 @@
+{
+  "appId": "2993388261247205445",
+  "listPages": [
+    "pages/index"
+  ],
+  "window": {
+    "title": "Vexim Global GS1",
+    "actionBarHidden": true,
+    "statusBar": "transparent",
+    "textColor": "black"
+  },
+  "app": {
+    "title": "Vexim Global GS1",
+    "headerTitle": "Vexim Global GS1"
+  }
+}

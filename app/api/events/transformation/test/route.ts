@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { validateTransformationEvent, type QuantityItem } from '@/lib/utils/mass-balance'
-import { TraceabilityService } from '@/lib/services/traceability'
+import { TraceabilityService } from '@/lib/services/traceability-service'
 
 /**
  * Test endpoint for transformation events

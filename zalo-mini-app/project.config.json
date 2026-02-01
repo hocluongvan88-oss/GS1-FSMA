@@ -1,0 +1,7 @@
+{
+  "template": "vite-typescript",
+  "tools": {
+    "zmp-cli": "4.0.1"
+  },
+  "miniAppId": "2993388261247205445"
+}

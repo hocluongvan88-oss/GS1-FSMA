@@ -3,7 +3,7 @@
 
 **Ngày kiểm toán:** 26/01/2026  
 **Kiểm toán viên:** v0 AI Professional Auditor  
-**Phạm vi:** Toàn bộ hệ thống - Frontend, Backend, Database, Security, Business Logic  
+**Phạm vi:** To��n bộ hệ thống - Frontend, Backend, Database, Security, Business Logic  
 **Tiêu chuẩn:** GS1 EPCIS 2.0, FSMA 204, ISO 22000, RBAC Security Standards
 
 ---
